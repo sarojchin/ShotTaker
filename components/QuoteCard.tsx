@@ -3,12 +3,11 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   PanResponder,
   Animated,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import Colors from '../constants/Colors';
 import Typography from '../constants/Typography';
 
@@ -22,6 +21,10 @@ interface Props {
   initialIndex?: number;
 }
 
+const { width: SCREEN_W } = Dimensions.get('window');
+const CARD_W = SCREEN_W - 40; // marginHorizontal: 20 each side
+const SWIPE_THRESHOLD = 60;
+
 // Pre-computed grain dots — deterministic, no Math.random() on render
 const GRAIN = Array.from({ length: 200 }, (_, i) => ({
   left: `${(((i * 127 + 37) % 97) / 97) * 100}%` as `${number}%`,
@@ -30,28 +33,54 @@ const GRAIN = Array.from({ length: 200 }, (_, i) => ({
   size: 1 + ((i * 3) % 2),
 }));
 
-const SWIPE_THRESHOLD = 50;
-
 export default function QuoteCard({ quotes, initialIndex = 0 }: Props) {
   const [index, setIndex] = useState(initialIndex);
-  const translateX = useRef(new Animated.Value(0)).current;
+  const dragX = useRef(new Animated.Value(0)).current;
 
-  const quote = quotes[index];
+  const rotate = dragX.interpolate({
+    inputRange: [-CARD_W, 0, CARD_W],
+    outputRange: ['-6deg', '0deg', '6deg'],
+    extrapolate: 'clamp',
+  });
 
-  const advance = () => {
-    Animated.sequence([
-      Animated.timing(translateX, {
-        toValue: -30,
-        duration: 120,
-        useNativeDriver: true,
-      }),
-      Animated.timing(translateX, {
+  const cardOpacity = dragX.interpolate({
+    inputRange: [-CARD_W, -CARD_W / 2, 0, CARD_W / 2, CARD_W],
+    outputRange: [0.4, 0.75, 1, 0.75, 0.4],
+    extrapolate: 'clamp',
+  });
+
+  const goNext = () => {
+    Animated.timing(dragX, {
+      toValue: -CARD_W * 1.3,
+      duration: 220,
+      useNativeDriver: true,
+    }).start(() => {
+      setIndex(i => (i + 1) % quotes.length);
+      dragX.setValue(CARD_W * 1.3);
+      Animated.spring(dragX, {
         toValue: 0,
-        duration: 0,
+        tension: 70,
+        friction: 11,
         useNativeDriver: true,
-      }),
-    ]).start();
-    setIndex(i => (i + 1) % quotes.length);
+      }).start();
+    });
+  };
+
+  const goPrev = () => {
+    Animated.timing(dragX, {
+      toValue: CARD_W * 1.3,
+      duration: 220,
+      useNativeDriver: true,
+    }).start(() => {
+      setIndex(i => (i - 1 + quotes.length) % quotes.length);
+      dragX.setValue(-CARD_W * 1.3);
+      Animated.spring(dragX, {
+        toValue: 0,
+        tension: 70,
+        friction: 11,
+        useNativeDriver: true,
+      }).start();
+    });
   };
 
   const panResponder = useRef(
@@ -59,17 +88,39 @@ export default function QuoteCard({ quotes, initialIndex = 0 }: Props) {
       onStartShouldSetPanResponder: () => false,
       onMoveShouldSetPanResponder: (_, { dx, dy }) =>
         Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8,
+      onPanResponderMove: (_, { dx }) => {
+        dragX.setValue(dx);
+      },
       onPanResponderRelease: (_, { dx }) => {
         if (dx < -SWIPE_THRESHOLD) {
-          advance();
+          goNext();
+        } else if (dx > SWIPE_THRESHOLD) {
+          goPrev();
+        } else {
+          Animated.spring(dragX, {
+            toValue: 0,
+            tension: 80,
+            friction: 12,
+            useNativeDriver: true,
+          }).start();
         }
       },
     }),
   ).current;
 
+  const quote = quotes[index];
+
   return (
     <View style={styles.wrapper} {...panResponder.panHandlers}>
-      <Animated.View style={{ transform: [{ translateX }] }}>
+      <Animated.View
+        style={[
+          styles.cardContainer,
+          {
+            opacity: cardOpacity,
+            transform: [{ translateX: dragX }, { rotate }],
+          },
+        ]}
+      >
         <LinearGradient
           colors={['#1a1714', '#22201c', '#1e1c17']}
           start={{ x: 0, y: 0 }}
@@ -95,11 +146,6 @@ export default function QuoteCard({ quotes, initialIndex = 0 }: Props) {
             ))}
           </View>
 
-          {/* Quote counter */}
-          <Text style={styles.counter}>
-            {index + 1} / {quotes.length}
-          </Text>
-
           {/* Opening quotation mark */}
           <Text style={styles.openingMark}>"</Text>
 
@@ -113,16 +159,6 @@ export default function QuoteCard({ quotes, initialIndex = 0 }: Props) {
           <Text style={styles.author}>— {quote.author}</Text>
         </LinearGradient>
       </Animated.View>
-
-      {/* Next arrow — right edge */}
-      <TouchableOpacity
-        style={styles.arrowButton}
-        onPress={advance}
-        hitSlop={{ top: 16, bottom: 16, left: 12, right: 12 }}
-        activeOpacity={0.6}
-      >
-        <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.55)" />
-      </TouchableOpacity>
     </View>
   );
 }
@@ -131,18 +167,23 @@ const styles = StyleSheet.create({
   wrapper: {
     marginHorizontal: 20,
     marginTop: 32,
-    borderRadius: 6,
+    height: 220,
+    // overflow visible so the card can tilt outside bounds
+  },
+  cardContainer: {
+    position: 'absolute',
+    width: CARD_W,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 14,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 12,
+    borderRadius: 6,
   },
   card: {
     paddingTop: 28,
     paddingBottom: 28,
     paddingHorizontal: 24,
-    paddingRight: 48,
     borderRadius: 6,
     overflow: 'hidden',
   },
@@ -150,12 +191,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     backgroundColor: '#c8bdb0',
     borderRadius: 1,
-  },
-  counter: {
-    ...Typography.labelSm,
-    color: 'rgba(255,255,255,0.3)',
-    fontSize: 10,
-    marginBottom: 12,
   },
   openingMark: {
     fontSize: 64,
@@ -183,14 +218,5 @@ const styles = StyleSheet.create({
     ...Typography.labelSm,
     color: Colors.primaryContainer,
     opacity: 0.8,
-  },
-  arrowButton: {
-    position: 'absolute',
-    right: 14,
-    top: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 32,
   },
 });
