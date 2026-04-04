@@ -11,7 +11,7 @@ interface Props {
   showTips?: boolean;
 }
 
-export default function ChallengeCard({ challenge, showTips = false }: Props) {
+function ChallengeCard({ challenge, showTips = false }: Props) {
   return (
     <View style={styles.card}>
       <View style={styles.badges}>
@@ -34,6 +34,8 @@ export default function ChallengeCard({ challenge, showTips = false }: Props) {
     </View>
   );
 }
+
+export default React.memo(ChallengeCard);
 
 const styles = StyleSheet.create({
   card: {

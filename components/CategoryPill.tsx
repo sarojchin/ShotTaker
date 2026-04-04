@@ -15,7 +15,7 @@ interface Props {
   category: Category;
 }
 
-export default function CategoryPill({ category }: Props) {
+function CategoryPill({ category }: Props) {
   const color = categoryColors[category];
   return (
     <View style={[styles.pill, { backgroundColor: color + '15' }]}>
@@ -23,6 +23,8 @@ export default function CategoryPill({ category }: Props) {
     </View>
   );
 }
+
+export default React.memo(CategoryPill);
 
 const styles = StyleSheet.create({
   pill: {

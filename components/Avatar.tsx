@@ -9,7 +9,7 @@ interface Props {
   size?: number;
 }
 
-export default function Avatar({ uri, username, size = 40 }: Props) {
+function Avatar({ uri, username, size = 40 }: Props) {
   const initials = username.slice(0, 2).toUpperCase();
   const borderRadius = size / 2;
 
@@ -33,6 +33,8 @@ export default function Avatar({ uri, username, size = 40 }: Props) {
     </View>
   );
 }
+
+export default React.memo(Avatar);
 
 const styles = StyleSheet.create({
   image: {

@@ -6,11 +6,13 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+<<<<<<< HEAD
   Image,
+=======
+>>>>>>> 3598a4f3452aa4ae3b4d8a8c0906897067fc3a24
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
@@ -26,7 +28,15 @@ export default function TodayScreen() {
     [],
   );
 
+  const dateString = useMemo(
+    () => new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+    [],
+  );
+
+  const todayIndex = useMemo(() => new Date().getDay() - 1, []);
+
   const handleUpload = async () => {
+    const ImagePicker = await import('expo-image-picker');
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       Alert.alert('Permission needed', 'Please allow photo access to upload your shot.');
@@ -49,6 +59,7 @@ export default function TodayScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+<<<<<<< HEAD
         {/* Header Bar */}
         <View style={styles.headerBar}>
           <View style={styles.headerLeft}>
@@ -59,6 +70,11 @@ export default function TodayScreen() {
             <Ionicons name="camera-outline" size={24} color={Colors.onBackground} />
           </TouchableOpacity>
         </View>
+=======
+        {/* Header */}
+        <Text style={styles.header}>Today</Text>
+        <Text style={styles.subtitle}>{dateString}</Text>
+>>>>>>> 3598a4f3452aa4ae3b4d8a8c0906897067fc3a24
 
         {/* Streak Hero */}
         <View style={styles.streakSection}>
@@ -84,7 +100,11 @@ export default function TodayScreen() {
           <View style={styles.weekRow}>
             {DAYS.map((day, i) => {
               const done = currentUserStreak.thisWeek[i];
+<<<<<<< HEAD
               const isToday = i === new Date().getDay() - 1;
+=======
+              const isToday = i === todayIndex;
+>>>>>>> 3598a4f3452aa4ae3b4d8a8c0906897067fc3a24
               return (
                 <View key={i} style={styles.dayCol}>
                   <Text style={[styles.dayLabel, isToday && styles.dayLabelToday]}>
