@@ -1,46 +1,73 @@
-// TakeTheShot — Photography Habit Tracker
-// Dark, moody palette with warm accent tones
+// TakeTheShot — "The Technical Gallerist" Design System
+// Sophisticated light palette: charcoals, crisp whites, Golden Hour orange, Technical Blue
 
 const Colors = {
-  // Core
-  background: '#0D0D0F',
-  surface: '#1A1A1E',
-  surfaceLight: '#242428',
-  surfaceBorder: '#2E2E34',
+  // Surface hierarchy (tonal layering, no borders)
+  background: '#fcf9f8',           // surface - main canvas
+  surface: '#f0edec',              // surface_container - content grouping
+  surfaceContainerLow: '#f6f3f2',  // surface_container_low - subtle sections
+  surfaceContainerHigh: '#eae7e6', // surface_container_high - deeper grouping
+  surfaceElevated: '#ffffff',      // surface_container_lowest - lifted cards
+  surfaceHighest: '#e4e1e0',      // surface_container_highest - input fills
 
-  // Text
-  textPrimary: '#F5F5F7',
-  textSecondary: '#A0A0A8',
-  textMuted: '#6B6B73',
+  // Text / on-surface
+  onBackground: '#1c1b1b',        // primary text — never use pure #000
+  onSurface: '#1c1b1b',
+  onSurfaceVariant: '#524440',     // secondary text
+  textMuted: '#857a75',            // muted / tertiary text
 
-  // Accent
-  accent: '#FF6B35',       // warm orange — primary CTA
-  accentLight: '#FF8A5C',
-  accentDark: '#CC5529',
+  // Primary — "Golden Hour" orange
+  primary: '#8b500a',
+  primaryContainer: '#d48c45',
+  onPrimary: '#ffffff',
+  onPrimaryContainer: '#3a1e00',
+
+  // Secondary — warm neutral
+  secondary: '#6f5b4f',
+  secondaryContainer: '#ecdfd6',
+  onSecondary: '#ffffff',
+  onSecondaryContainer: '#29150b',
+
+  // Tertiary — "Technical Blue"
+  tertiary: '#005bc1',
+  tertiaryContainer: '#d4e3ff',
+  onTertiary: '#ffffff',
+  onTertiaryContainer: '#001b3f',
+
+  // Outline
+  outline: '#867771',
+  outlineVariant: '#d7c3b3',       // ghost borders (15% opacity usage)
+
+  // Inverse (for tooltips)
+  inverseSurface: '#322f2e',
+  inverseOnSurface: '#f5f0ee',
+
+  // Error
+  error: '#ba1a1a',
+  errorContainer: '#ffdad6',
 
   // Streak / gamification
-  streakFlame: '#FF9500',
-  gold: '#FFD700',
-  silver: '#C0C0C0',
-  bronze: '#CD7F32',
+  streakFlame: '#d48c45',
+  gold: '#b8860b',
+  silver: '#8a8a8a',
+  bronze: '#8b5e3c',
 
-  // Category colors
-  composition: '#5E9EFF',
-  lighting: '#FFCC00',
-  technique: '#34C759',
-  subject: '#BF5AF2',
+  // Category colors (muted, sophisticated)
+  composition: '#5e7a9e',
+  lighting: '#b8860b',
+  technique: '#4a7c59',
+  subject: '#7a5ea0',
 
   // Difficulty
-  beginner: '#34C759',
-  intermediate: '#FF9500',
-  advanced: '#FF3B30',
+  beginner: '#4a7c59',
+  intermediate: '#b8860b',
+  advanced: '#a63d2f',
 
   // Utility
-  white: '#FFFFFF',
-  black: '#000000',
-  overlay: 'rgba(0,0,0,0.6)',
-  success: '#34C759',
-  error: '#FF3B30',
+  white: '#ffffff',
+  black: '#1c1b1b',
+  overlay: 'rgba(28,27,27,0.4)',
+  success: '#4a7c59',
 };
 
 export default Colors;

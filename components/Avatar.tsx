@@ -29,24 +29,22 @@ export default function Avatar({ uri, username, size = 40 }: Props) {
         { width: size, height: size, borderRadius },
       ]}
     >
-      <Text style={[styles.initials, { fontSize: size * 0.38 }]}>{initials}</Text>
+      <Text style={[styles.initials, { fontSize: size * 0.36 }]}>{initials}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   image: {
-    backgroundColor: Colors.surfaceLight,
+    backgroundColor: Colors.surface,
   },
   placeholder: {
-    backgroundColor: Colors.surfaceLight,
+    backgroundColor: Colors.surfaceContainerHigh,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: Colors.surfaceBorder,
   },
   initials: {
-    ...Typography.headline,
-    color: Colors.textSecondary,
+    ...Typography.labelMd,
+    color: Colors.onSurfaceVariant,
   },
 });
