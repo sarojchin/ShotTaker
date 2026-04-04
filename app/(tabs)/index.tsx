@@ -13,9 +13,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
+import StreakCalendar from '../../components/StreakCalendar';
 import { todayChallenge, currentUserStreak, quotes } from '../../data/mockData';
 
-const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
 // Placeholder gallery images (mock colors representing photos)
 const GALLERY_STRIP = [
@@ -40,8 +40,6 @@ export default function TodayScreen() {
     () => quotes[Math.floor(Math.random() * quotes.length)],
     [],
   );
-
-  const todayIndex = useMemo(() => new Date().getDay() - 1, []);
 
   const handleUpload = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -80,10 +78,13 @@ export default function TodayScreen() {
         {/* Streak Hero */}
         <View style={styles.streakSection}>
           <Text style={styles.streakDays}>{currentUserStreak.current} Days</Text>
-          <Text style={styles.streakOnFire}>On Fire</Text>
+          <Text style={styles.streakOnFire}>
+            {currentUserStreak.current > 0 ? 'On Fire' : 'Ready to Start'}
+          </Text>
           <Text style={styles.streakDescription}>
-            You're maintaining a {currentUserStreak.current}-day streak.{'\n'}
-            Keep shooting to build your craft.
+            {currentUserStreak.current > 0
+              ? `You're maintaining a ${currentUserStreak.current}-day streak.\nKeep shooting to build your craft.`
+              : "Begin your daily habit today.\nCapture one shot to start your streak."}
           </Text>
           <View style={styles.streakMeta}>
             <Text style={styles.streakMetaLabel}>LONGEST: {currentUserStreak.longest} DAYS</Text>
@@ -103,37 +104,8 @@ export default function TodayScreen() {
           <Text style={styles.roleText}>Lead Observer</Text>
         </View>
 
-        {/* Week Strip */}
-        <View style={styles.weekContainer}>
-          <View style={styles.weekRow}>
-            {DAYS.map((day, i) => {
-              const done = currentUserStreak.thisWeek[i];
-<<<<<<< HEAD
-              const isToday = i === todayIndex;
-=======
-              const isToday = i === new Date().getDay() - 1;
->>>>>>> b0a7a6fd60b2eff3afe4ce6b65adadfdac94fbfe
-              return (
-                <View key={i} style={styles.dayCol}>
-                  <Text style={[styles.dayLabel, isToday && styles.dayLabelToday]}>
-                    {day}
-                  </Text>
-                  <View
-                    style={[
-                      styles.dayCircle,
-                      done && styles.dayCircleDone,
-                      isToday && !done && styles.dayCircleToday,
-                    ]}
-                  >
-                    {done ? (
-                      <Ionicons name="checkmark" size={14} color={Colors.white} />
-                    ) : null}
-                  </View>
-                </View>
-              );
-            })}
-          </View>
-        </View>
+        {/* Streak Calendar */}
+        <StreakCalendar streakDays={[]} />
 
         {/* Upload CTA */}
         <TouchableOpacity
@@ -313,44 +285,6 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
 
-  // Week Strip
-  weekContainer: {
-    marginHorizontal: 20,
-    marginTop: 24,
-    backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: 12,
-    padding: 16,
-  },
-  weekRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  dayCol: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  dayLabel: {
-    ...Typography.labelSm,
-    color: Colors.textMuted,
-    fontSize: 11,
-  },
-  dayLabelToday: {
-    color: Colors.primary,
-  },
-  dayCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dayCircleDone: {
-    backgroundColor: Colors.primary,
-  },
-  dayCircleToday: {
-    backgroundColor: Colors.primaryContainer + '30',
-  },
 
   // Upload CTA
   uploadCard: {

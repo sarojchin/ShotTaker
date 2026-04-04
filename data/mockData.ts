@@ -3,9 +3,9 @@ import challenges from './challenges';
 
 // --- Current user ---
 export const currentUserStreak: Streak = {
-  current: 14,
-  longest: 21,
-  thisWeek: [true, true, true, true, true, true, false], // Mon–Sun
+  current: 0,
+  longest: 0,
+  thisWeek: [false, false, false, false, false, false, false], // Mon–Sun
 };
 
 export const currentUser: Profile = {
