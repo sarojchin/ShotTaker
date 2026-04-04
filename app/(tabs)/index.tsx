@@ -6,6 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Modal,
+  Pressable,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
@@ -33,8 +35,20 @@ const CHALLENGE_GRID = [
   { color: '#3a4a5a', aspect: 1 },
 ];
 
+const PREVIOUS_PICTURES = [
+  { color: '#5a4a3a', label: 'Mar 30', date: 'March 30' },
+  { color: '#3a5a4a', label: 'Mar 29', date: 'March 29' },
+  { color: '#4a3a5a', label: 'Mar 28', date: 'March 28' },
+  { color: '#5a5a3a', label: 'Mar 27', date: 'March 27' },
+  { color: '#3a4a4a', label: 'Mar 26', date: 'March 26' },
+  { color: '#5a3a3a', label: 'Mar 25', date: 'March 25' },
+];
+
+type PreviousPicture = typeof PREVIOUS_PICTURES[number];
+
 export default function TodayScreen() {
   const [uploadedUri, setUploadedUri] = useState<string | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<PreviousPicture | null>(null);
 
   const quote = useMemo(
     () => quotes[Math.floor(Math.random() * quotes.length)],
@@ -108,11 +122,7 @@ export default function TodayScreen() {
           <View style={styles.weekRow}>
             {DAYS.map((day, i) => {
               const done = currentUserStreak.thisWeek[i];
-<<<<<<< HEAD
               const isToday = i === todayIndex;
-=======
-              const isToday = i === new Date().getDay() - 1;
->>>>>>> b0a7a6fd60b2eff3afe4ce6b65adadfdac94fbfe
               return (
                 <View key={i} style={styles.dayCol}>
                   <Text style={[styles.dayLabel, isToday && styles.dayLabelToday]}>
@@ -158,6 +168,24 @@ export default function TodayScreen() {
             </Text>
           </LinearGradient>
         </TouchableOpacity>
+
+        {/* Previous Pictures */}
+        <View style={styles.previousSection}>
+          <Text style={styles.sectionLabel}>Previous Pictures</Text>
+          <View style={styles.thumbnailGrid}>
+            {PREVIOUS_PICTURES.map((item, i) => (
+              <TouchableOpacity
+                key={i}
+                style={styles.thumbnailItem}
+                onPress={() => setSelectedPhoto(item)}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.thumbnailImage, { backgroundColor: item.color }]} />
+                <Text style={styles.thumbnailLabel}>{item.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
 
         {/* Gallery Strip — horizontal thumbnail row */}
         <ScrollView
@@ -212,6 +240,33 @@ export default function TodayScreen() {
           <Text style={styles.quoteAuthor}>— {quote.author}</Text>
         </View>
       </ScrollView>
+
+      {/* Expanded Photo Modal */}
+      <Modal
+        visible={selectedPhoto !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelectedPhoto(null)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setSelectedPhoto(null)}>
+          <View style={styles.modalContent}>
+            <View
+              style={[
+                styles.modalImage,
+                selectedPhoto ? { backgroundColor: selectedPhoto.color } : {},
+              ]}
+            />
+            <Text style={styles.modalDate}>{selectedPhoto?.date}</Text>
+            <TouchableOpacity
+              style={styles.modalClose}
+              onPress={() => setSelectedPhoto(null)}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            >
+              <Ionicons name="close" size={22} color={Colors.inverseOnSurface} />
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -380,6 +435,31 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 
+  // Previous Pictures
+  previousSection: {
+    paddingHorizontal: 20,
+    marginTop: 28,
+  },
+  thumbnailGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  thumbnailItem: {
+    width: '30.5%',
+  },
+  thumbnailImage: {
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: 2,
+  },
+  thumbnailLabel: {
+    ...Typography.labelSm,
+    color: Colors.textMuted,
+    marginTop: 5,
+    fontSize: 10,
+  },
+
   // Gallery Strip
   galleryStripScroll: {
     marginTop: 24,
@@ -464,5 +544,39 @@ const styles = StyleSheet.create({
     ...Typography.labelSm,
     color: Colors.textMuted,
     marginTop: 10,
+  },
+
+  // Expanded Photo Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(28,27,27,0.88)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    width: '100%',
+    position: 'relative',
+    alignItems: 'center',
+  },
+  modalImage: {
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: 4,
+  },
+  modalDate: {
+    ...Typography.labelMd,
+    color: Colors.inverseOnSurface,
+    marginTop: 14,
+    letterSpacing: 1,
+  },
+  modalClose: {
+    position: 'absolute',
+    top: -40,
+    right: 0,
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
