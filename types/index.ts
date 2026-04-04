@@ -30,14 +30,6 @@ export interface Profile {
   completions: number;
 }
 
-export interface Completion {
-  id: string;
-  userId: string;
-  challengeId: string;
-  imageUri: string;
-  completedAt: string;
-}
-
 export interface LeaderboardEntry {
   rank: number;
   profile: Profile;

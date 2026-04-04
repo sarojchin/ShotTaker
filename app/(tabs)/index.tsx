@@ -6,11 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  Platform,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
@@ -27,7 +25,15 @@ export default function TodayScreen() {
     [],
   );
 
+  const dateString = useMemo(
+    () => new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+    [],
+  );
+
+  const todayIndex = useMemo(() => new Date().getDay() - 1, []);
+
   const handleUpload = async () => {
+    const ImagePicker = await import('expo-image-picker');
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       Alert.alert('Permission needed', 'Please allow photo access to upload your shot.');
@@ -52,13 +58,7 @@ export default function TodayScreen() {
       >
         {/* Header */}
         <Text style={styles.header}>Today</Text>
-        <Text style={styles.subtitle}>
-          {new Date().toLocaleDateString('en-US', {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </Text>
+        <Text style={styles.subtitle}>{dateString}</Text>
 
         {/* Streak Banner */}
         <LinearGradient
@@ -85,7 +85,7 @@ export default function TodayScreen() {
           <View style={styles.weekRow}>
             {DAYS.map((day, i) => {
               const done = currentUserStreak.thisWeek[i];
-              const isToday = i === new Date().getDay() - 1; // 0=Mon offset
+              const isToday = i === todayIndex;
               return (
                 <View key={i} style={styles.dayCol}>
                   <Text style={[styles.dayLabel, isToday && styles.dayLabelToday]}>

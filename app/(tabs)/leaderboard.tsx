@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
 import Avatar from '../../components/Avatar';
 import { leaderboard } from '../../data/mockData';
 import { LeaderboardEntry } from '../../types';
+
+const RowSeparator = () => <View style={styles.rowSep} />;
 
 const PODIUM_COLORS = [Colors.gold, Colors.silver, Colors.bronze];
 
@@ -98,7 +100,7 @@ export default function LeaderboardScreen() {
             <View style={styles.divider} />
           </>
         }
-        ItemSeparatorComponent={() => <View style={styles.rowSep} />}
+        ItemSeparatorComponent={RowSeparator}
       />
     </SafeAreaView>
   );

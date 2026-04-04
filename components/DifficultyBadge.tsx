@@ -14,7 +14,7 @@ interface Props {
   difficulty: Difficulty;
 }
 
-export default function DifficultyBadge({ difficulty }: Props) {
+function DifficultyBadge({ difficulty }: Props) {
   const color = difficultyColors[difficulty];
   return (
     <View style={[styles.badge, { backgroundColor: color + '20', borderColor: color }]}>
@@ -22,6 +22,8 @@ export default function DifficultyBadge({ difficulty }: Props) {
     </View>
   );
 }
+
+export default React.memo(DifficultyBadge);
 
 const styles = StyleSheet.create({
   badge: {

@@ -14,6 +14,8 @@ import ChallengeCard from '../../components/ChallengeCard';
 import challenges from '../../data/challenges';
 import { Category, Difficulty } from '../../types';
 
+const ChallengeSeparator = () => <View style={styles.separator} />;
+
 const CATEGORIES: (Category | 'All')[] = ['All', 'Composition', 'Lighting', 'Technique', 'Subject'];
 const DIFFICULTIES: (Difficulty | 'All')[] = ['All', 'Beginner', 'Intermediate', 'Advanced'];
 
@@ -115,7 +117,7 @@ export default function ChallengesScreen() {
           renderItem={({ item }) => <ChallengeCard challenge={item} />}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ItemSeparatorComponent={ChallengeSeparator}
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.emptyText}>No challenges match your filters.</Text>
