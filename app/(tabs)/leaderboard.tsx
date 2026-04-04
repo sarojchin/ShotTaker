@@ -1,23 +1,29 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
 import Avatar from '../../components/Avatar';
 import { leaderboard } from '../../data/mockData';
 import { LeaderboardEntry } from '../../types';
 
+<<<<<<< HEAD
+=======
+const RowSeparator = () => <View style={styles.rowSep} />;
+
 const PODIUM_COLORS = [Colors.gold, Colors.silver, Colors.bronze];
 
+>>>>>>> 3598a4f3452aa4ae3b4d8a8c0906897067fc3a24
 function PodiumCard({ entry, index }: { entry: LeaderboardEntry; index: number }) {
-  const medalColor = PODIUM_COLORS[index];
   const isFirst = index === 0;
+  const podiumColors = [Colors.gold, Colors.silver, Colors.bronze];
+  const medalColor = podiumColors[index];
 
   return (
     <View style={[styles.podiumCard, isFirst && styles.podiumCardFirst]}>
-      <View style={[styles.medalBadge, { backgroundColor: medalColor + '25' }]}>
-        <Ionicons name="trophy" size={isFirst ? 22 : 18} color={medalColor} />
+      <View style={[styles.medalBadge, { backgroundColor: medalColor + '20' }]}>
+        <Text style={[styles.medalNumber, { color: medalColor }]}>{index + 1}</Text>
       </View>
       <Avatar
         uri={entry.profile.avatarUrl}
@@ -27,10 +33,11 @@ function PodiumCard({ entry, index }: { entry: LeaderboardEntry; index: number }
       <Text style={styles.podiumName} numberOfLines={1}>
         {entry.profile.username}
       </Text>
-      <Text style={styles.podiumPoints}>{entry.profile.points.toLocaleString()} pts</Text>
+      <Text style={styles.podiumPoints}>{entry.profile.points.toLocaleString()}</Text>
+      <Text style={styles.podiumPointsLabel}>POINTS</Text>
       <View style={styles.podiumStreak}>
-        <Ionicons name="flame" size={12} color={Colors.streakFlame} />
-        <Text style={styles.podiumStreakText}>{entry.profile.streak.current}</Text>
+        <View style={styles.streakDot} />
+        <Text style={styles.podiumStreakText}>{entry.profile.streak.current}d streak</Text>
       </View>
     </View>
   );
@@ -54,7 +61,7 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
           {entry.isCurrentUser ? ' (You)' : ''}
         </Text>
         <View style={styles.rowStats}>
-          <Ionicons name="flame" size={12} color={Colors.streakFlame} />
+          <View style={styles.streakDot} />
           <Text style={styles.rowStatText}>{entry.profile.streak.current}d streak</Text>
           <Text style={styles.rowStatDot}>·</Text>
           <Text style={styles.rowStatText}>{entry.profile.completions} shots</Text>
@@ -81,24 +88,29 @@ export default function LeaderboardScreen() {
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           <>
+            {/* Header Bar */}
+            <View style={styles.headerBar}>
+              <View style={styles.headerLeft}>
+                <Ionicons name="aperture" size={22} color={Colors.onBackground} />
+                <Text style={styles.brandName}>APERTURE</Text>
+              </View>
+            </View>
+
             <Text style={styles.header}>Leaderboard</Text>
             <Text style={styles.subtitle}>Top photographers this month</Text>
 
             {/* Podium */}
             <View style={styles.podiumRow}>
-              {/* 2nd place */}
               <PodiumCard entry={top3[1]} index={1} />
-              {/* 1st place */}
               <PodiumCard entry={top3[0]} index={0} />
-              {/* 3rd place */}
               <PodiumCard entry={top3[2]} index={2} />
             </View>
 
-            {/* Divider */}
-            <View style={styles.divider} />
+            {/* Section label */}
+            <Text style={styles.sectionLabel}>ALL PHOTOGRAPHERS</Text>
           </>
         }
-        ItemSeparatorComponent={() => <View style={styles.rowSep} />}
+        ItemSeparatorComponent={RowSeparator}
       />
     </SafeAreaView>
   );
@@ -110,18 +122,44 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   listContent: {
-    padding: 20,
+    paddingHorizontal: 20,
     paddingBottom: 40,
   },
+
+  // Header Bar
+  headerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  brandName: {
+    ...Typography.labelLg,
+    color: Colors.onBackground,
+    fontSize: 15,
+    letterSpacing: 2,
+  },
+
   header: {
-    ...Typography.largeTitle,
-    color: Colors.textPrimary,
+    ...Typography.headlineLg,
+    color: Colors.onBackground,
   },
   subtitle: {
-    ...Typography.callout,
-    color: Colors.textSecondary,
+    ...Typography.bodySm,
+    color: Colors.textMuted,
     marginTop: 4,
     marginBottom: 24,
+  },
+
+  sectionLabel: {
+    ...Typography.labelMd,
+    color: Colors.textMuted,
+    marginBottom: 12,
   },
 
   // Podium
@@ -129,93 +167,93 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'flex-end',
-    gap: 12,
-    marginBottom: 24,
+    gap: 10,
+    marginBottom: 28,
   },
   podiumCard: {
     flex: 1,
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
+    backgroundColor: Colors.surfaceElevated,
+    borderRadius: 6,
     padding: 14,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.surfaceBorder,
-    gap: 6,
+    gap: 4,
   },
   podiumCardFirst: {
     paddingVertical: 20,
-    borderColor: Colors.gold + '40',
+    backgroundColor: Colors.surfaceContainerLow,
   },
   medalBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  medalNumber: {
+    ...Typography.labelMd,
+    fontWeight: '700',
+  },
   podiumName: {
-    ...Typography.caption1,
-    color: Colors.textPrimary,
-    fontWeight: '600',
+    ...Typography.labelSm,
+    color: Colors.onBackground,
     marginTop: 4,
   },
   podiumPoints: {
-    ...Typography.footnote,
-    color: Colors.accent,
-    fontWeight: '700',
+    ...Typography.titleMd,
+    color: Colors.primary,
+  },
+  podiumPointsLabel: {
+    ...Typography.labelSm,
+    color: Colors.textMuted,
+    fontSize: 9,
   },
   podiumStreak: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
+    gap: 4,
+  },
+  streakDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.primaryContainer,
   },
   podiumStreakText: {
     ...Typography.caption2,
     color: Colors.textMuted,
   },
 
-  // Divider
-  divider: {
-    height: 1,
-    backgroundColor: Colors.surfaceBorder,
-    marginBottom: 8,
-  },
-
-  // Rows
+  // Rows — no borders, tonal shift
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
-    borderRadius: 14,
+    backgroundColor: Colors.surfaceElevated,
+    borderRadius: 6,
     padding: 14,
     gap: 12,
-    borderWidth: 1,
-    borderColor: Colors.surfaceBorder,
   },
   rowHighlighted: {
-    borderColor: Colors.accent + '60',
-    backgroundColor: Colors.accent + '10',
+    backgroundColor: Colors.secondaryContainer,
   },
   rank: {
-    ...Typography.headline,
+    ...Typography.titleMd,
     color: Colors.textMuted,
     width: 24,
     textAlign: 'center',
   },
   rankHighlighted: {
-    color: Colors.accent,
+    color: Colors.primary,
   },
   rowInfo: {
     flex: 1,
     gap: 3,
   },
   rowName: {
-    ...Typography.subhead,
-    color: Colors.textPrimary,
-    fontWeight: '600',
+    ...Typography.titleSm,
+    color: Colors.onBackground,
   },
   rowNameHighlighted: {
-    color: Colors.accent,
+    color: Colors.primary,
   },
   rowStats: {
     flexDirection: 'row',
@@ -231,11 +269,11 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
   },
   rowPoints: {
-    ...Typography.headline,
-    color: Colors.textSecondary,
+    ...Typography.titleMd,
+    color: Colors.onSurfaceVariant,
   },
   rowPointsHighlighted: {
-    color: Colors.accent,
+    color: Colors.primary,
   },
   rowSep: {
     height: 8,

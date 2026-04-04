@@ -1,51 +1,72 @@
 import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import Colors from '../../constants/Colors';
+import Typography from '../../constants/Typography';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: Colors.background },
-        headerTintColor: Colors.textPrimary,
-        headerTitleStyle: { fontWeight: '700' },
+        headerStyle: {
+          backgroundColor: Colors.background,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        headerTintColor: Colors.onBackground,
+        headerTitleStyle: {
+          ...Typography.labelLg,
+          color: Colors.onBackground,
+        },
         tabBarStyle: {
-          backgroundColor: Colors.surface,
-          borderTopColor: Colors.surfaceBorder,
-          borderTopWidth: 1,
+          backgroundColor: Colors.surfaceElevated,
+          borderTopWidth: 0,
           height: 88,
           paddingBottom: 28,
           paddingTop: 8,
+          elevation: 0,
+          shadowColor: Colors.onSurface,
+          shadowOffset: { width: 0, height: -10 },
+          shadowOpacity: 0.04,
+          shadowRadius: 40,
         },
-        tabBarActiveTintColor: Colors.accent,
+        tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textMuted,
+        tabBarLabelStyle: {
+          ...Typography.labelSm,
+          fontSize: 10,
+          letterSpacing: 0.8,
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Today',
+          title: 'TODAY',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="sunny" size={size} color={color} />
+            <Ionicons name="sunny-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="challenges"
         options={{
-          title: 'Challenges',
+          title: 'CHALLENGES',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="grid" size={size} color={color} />
+            <Ionicons name="aperture-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="leaderboard"
         options={{
-          title: 'Leaderboard',
+          title: 'LEADERS',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="trophy" size={size} color={color} />
+            <Ionicons name="podium-outline" size={size} color={color} />
           ),
         }}
       />

@@ -15,15 +15,16 @@ interface Props {
   category: Category;
 }
 
-export default function CategoryPill({ category }: Props) {
+function CategoryPill({ category }: Props) {
   const color = categoryColors[category];
   return (
-    <View style={[styles.pill, { backgroundColor: color + '20' }]}>
-      <View style={[styles.dot, { backgroundColor: color }]} />
-      <Text style={[styles.text, { color }]}>{category}</Text>
+    <View style={[styles.pill, { backgroundColor: color + '15' }]}>
+      <Text style={[styles.text, { color }]}>{category.toUpperCase()}</Text>
     </View>
   );
 }
+
+export default React.memo(CategoryPill);
 
 const styles = StyleSheet.create({
   pill: {
@@ -31,17 +32,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 14,
+    borderRadius: 4,
     alignSelf: 'flex-start',
-    gap: 6,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
   },
   text: {
-    ...Typography.caption1,
-    fontWeight: '600',
+    ...Typography.labelSm,
+    fontSize: 10,
   },
 });

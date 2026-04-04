@@ -11,7 +11,7 @@ interface Props {
   showTips?: boolean;
 }
 
-export default function ChallengeCard({ challenge, showTips = false }: Props) {
+function ChallengeCard({ challenge, showTips = false }: Props) {
   return (
     <View style={styles.card}>
       <View style={styles.badges}>
@@ -22,10 +22,10 @@ export default function ChallengeCard({ challenge, showTips = false }: Props) {
       <Text style={styles.description}>{challenge.description}</Text>
       {showTips && challenge.tips.length > 0 && (
         <View style={styles.tipsSection}>
-          <Text style={styles.tipsHeader}>Tips</Text>
+          <Text style={styles.tipsHeader}>TIPS</Text>
           {challenge.tips.map((tip, i) => (
             <View key={i} style={styles.tipRow}>
-              <Text style={styles.tipBullet}>•</Text>
+              <View style={styles.tipDot} />
               <Text style={styles.tipText}>{tip}</Text>
             </View>
           ))}
@@ -35,13 +35,13 @@ export default function ChallengeCard({ challenge, showTips = false }: Props) {
   );
 }
 
+export default React.memo(ChallengeCard);
+
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
+    backgroundColor: Colors.surfaceElevated,
+    borderRadius: 6,
     padding: 20,
-    borderWidth: 1,
-    borderColor: Colors.surfaceBorder,
   },
   badges: {
     flexDirection: 'row',
@@ -49,41 +49,48 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   title: {
-    ...Typography.title3,
-    color: Colors.textPrimary,
+    ...Typography.titleLg,
+    color: Colors.onBackground,
     marginBottom: 8,
   },
   description: {
-    ...Typography.body,
-    color: Colors.textSecondary,
-    lineHeight: 24,
+    ...Typography.bodyMd,
+    color: Colors.onSurfaceVariant,
+    lineHeight: 22,
   },
   tipsSection: {
     marginTop: 16,
     paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: Colors.surfaceBorder,
+    backgroundColor: Colors.surfaceContainerLow,
+    marginHorizontal: -20,
+    marginBottom: -20,
+    padding: 20,
+    borderBottomLeftRadius: 6,
+    borderBottomRightRadius: 6,
   },
   tipsHeader: {
-    ...Typography.headline,
-    color: Colors.textPrimary,
+    ...Typography.labelMd,
+    color: Colors.textMuted,
     marginBottom: 10,
   },
   tipRow: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     marginBottom: 6,
-    paddingRight: 16,
+    paddingRight: 8,
   },
-  tipBullet: {
-    ...Typography.body,
-    color: Colors.accent,
-    marginRight: 8,
-    lineHeight: 24,
+  tipDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.primaryContainer,
+    marginRight: 10,
+    marginTop: 8,
   },
   tipText: {
-    ...Typography.body,
-    color: Colors.textSecondary,
+    ...Typography.bodySm,
+    color: Colors.onSurfaceVariant,
     flex: 1,
-    lineHeight: 24,
+    lineHeight: 20,
   },
 });
