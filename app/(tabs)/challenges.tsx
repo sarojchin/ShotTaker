@@ -32,9 +32,6 @@ export default function ChallengesScreen() {
     });
   }, [selectedCategory, selectedDifficulty]);
 
-  // Pick a featured challenge
-  const featured = challenges[0]; // Rule of Thirds
-
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.container}>
@@ -123,9 +120,12 @@ export default function ChallengesScreen() {
           renderItem={({ item }) => <ChallengeCard challenge={item} />}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+<<<<<<< HEAD
+          ItemSeparatorComponent={ChallengeSeparator}
+=======
           ItemSeparatorComponent={() => <View style={styles.separator} />}
+>>>>>>> b0a7a6fd60b2eff3afe4ce6b65adadfdac94fbfe
           ListHeaderComponent={
-            // Featured challenge hero
             <View style={styles.featuredCard}>
               <View style={styles.featuredImagePlaceholder}>
                 <Ionicons name="aperture" size={48} color="rgba(255,255,255,0.3)" />
