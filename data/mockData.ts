@@ -3,8 +3,8 @@ import challenges from './challenges';
 
 // --- Current user ---
 export const currentUserStreak: Streak = {
-  current: 7,
-  longest: 14,
+  current: 14,
+  longest: 21,
   thisWeek: [true, true, true, true, true, true, false], // Mon–Sun
 };
 
@@ -20,7 +20,7 @@ export const currentUser: Profile = {
 // --- Today's challenge ---
 export const todayChallenge: DailyChallenge = {
   date: new Date().toISOString().split('T')[0],
-  challenge: challenges[3], // Silhouette Shot
+  challenge: challenges[2], // Leading Lines
 };
 
 // --- Leaderboard ---

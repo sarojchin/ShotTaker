@@ -6,10 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-<<<<<<< HEAD
-  Image,
-=======
->>>>>>> 3598a4f3452aa4ae3b4d8a8c0906897067fc3a24
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,16 +16,27 @@ import { todayChallenge, currentUserStreak, quotes } from '../../data/mockData';
 
 const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
+// Placeholder gallery images (mock colors representing photos)
+const GALLERY_STRIP = [
+  { color: '#5a4a3a', label: 'Roads' },
+  { color: '#3a4a5a', label: 'Rails' },
+  { color: '#6a5a4a', label: 'Fences' },
+  { color: '#4a5a3a', label: 'Paths' },
+  { color: '#5a3a4a', label: 'Bridges' },
+];
+
+const CHALLENGE_GRID = [
+  { color: '#4a4a4a', aspect: 1 },
+  { color: '#5a6a5a', aspect: 1 },
+  { color: '#7a6a5a', aspect: 1 },
+  { color: '#3a4a5a', aspect: 1 },
+];
+
 export default function TodayScreen() {
   const [uploadedUri, setUploadedUri] = useState<string | null>(null);
 
   const quote = useMemo(
     () => quotes[Math.floor(Math.random() * quotes.length)],
-    [],
-  );
-
-  const dateString = useMemo(
-    () => new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
     [],
   );
 
@@ -59,7 +66,6 @@ export default function TodayScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-<<<<<<< HEAD
         {/* Header Bar */}
         <View style={styles.headerBar}>
           <View style={styles.headerLeft}>
@@ -70,11 +76,6 @@ export default function TodayScreen() {
             <Ionicons name="camera-outline" size={24} color={Colors.onBackground} />
           </TouchableOpacity>
         </View>
-=======
-        {/* Header */}
-        <Text style={styles.header}>Today</Text>
-        <Text style={styles.subtitle}>{dateString}</Text>
->>>>>>> 3598a4f3452aa4ae3b4d8a8c0906897067fc3a24
 
         {/* Streak Hero */}
         <View style={styles.streakSection}>
@@ -89,6 +90,13 @@ export default function TodayScreen() {
           </View>
         </View>
 
+        {/* Level Indicator */}
+        <View style={styles.levelRow}>
+          <Ionicons name="chevron-back" size={14} color={Colors.textMuted} />
+          <Text style={styles.levelText}>LEVEL</Text>
+          <Ionicons name="chevron-forward" size={14} color={Colors.textMuted} />
+        </View>
+
         {/* Role Badge */}
         <View style={styles.roleBadge}>
           <Ionicons name="eye-outline" size={16} color={Colors.primary} />
@@ -100,11 +108,7 @@ export default function TodayScreen() {
           <View style={styles.weekRow}>
             {DAYS.map((day, i) => {
               const done = currentUserStreak.thisWeek[i];
-<<<<<<< HEAD
-              const isToday = i === new Date().getDay() - 1;
-=======
               const isToday = i === todayIndex;
->>>>>>> 3598a4f3452aa4ae3b4d8a8c0906897067fc3a24
               return (
                 <View key={i} style={styles.dayCol}>
                   <Text style={[styles.dayLabel, isToday && styles.dayLabelToday]}>
@@ -151,39 +155,35 @@ export default function TodayScreen() {
           </LinearGradient>
         </TouchableOpacity>
 
-        {/* Daily Challenge - "Leading Lines" style card */}
-        <View style={styles.challengeSection}>
-          <Text style={styles.sectionLabel}>TODAY'S CHALLENGE</Text>
-          <View style={styles.challengeCard}>
-            <View style={styles.challengeHeader}>
-              <Text style={styles.challengeCategory}>
-                {todayChallenge.challenge.category.toUpperCase()}
-              </Text>
-              <View style={styles.challengeDiffBadge}>
-                <Text style={styles.challengeDiffText}>
-                  {todayChallenge.challenge.difficulty.toUpperCase()}
-                </Text>
-              </View>
+        {/* Gallery Strip — horizontal thumbnail row */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.galleryStripRow}
+          style={styles.galleryStripScroll}
+        >
+          {GALLERY_STRIP.map((item, i) => (
+            <View key={i} style={styles.galleryStripItem}>
+              <View style={[styles.galleryStripImage, { backgroundColor: item.color }]} />
             </View>
-            <Text style={styles.challengeTitle}>{todayChallenge.challenge.title}</Text>
-            <Text style={styles.challengeDesc}>{todayChallenge.challenge.description}</Text>
-            {todayChallenge.challenge.tips.length > 0 && (
-              <View style={styles.tipsSection}>
-                <Text style={styles.tipsLabel}>QUICK TIPS</Text>
-                {todayChallenge.challenge.tips.map((tip, i) => (
-                  <View key={i} style={styles.tipRow}>
-                    <View style={styles.tipDot} />
-                    <Text style={styles.tipText}>{tip}</Text>
-                  </View>
-                ))}
+          ))}
+        </ScrollView>
+
+        {/* Today's Challenge Gallery — "Leading Lines" */}
+        <View style={styles.challengeGallerySection}>
+          <Text style={styles.sectionLabel}>{todayChallenge.challenge.title}</Text>
+          <View style={styles.imageGrid}>
+            {CHALLENGE_GRID.map((item, i) => (
+              <View key={i} style={styles.imageGridItem}>
+                <View style={[styles.imageGridPlaceholder, { backgroundColor: item.color }]} />
               </View>
-            )}
+            ))}
           </View>
         </View>
 
         {/* Recent Insights */}
         <View style={styles.insightsSection}>
-          <Text style={styles.sectionLabel}>RECENT INSIGHTS</Text>
+          <Text style={styles.sectionLabel}>Recent Insights</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -278,6 +278,19 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
   },
 
+  // Level Indicator
+  levelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginHorizontal: 20,
+    marginTop: 12,
+  },
+  levelText: {
+    ...Typography.labelSm,
+    color: Colors.textMuted,
+  },
+
   // Role Badge
   roleBadge: {
     flexDirection: 'row',
@@ -363,96 +376,56 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 
-  // Daily Challenge
-  challengeSection: {
+  // Gallery Strip
+  galleryStripScroll: {
+    marginTop: 24,
+  },
+  galleryStripRow: {
     paddingHorizontal: 20,
-    marginTop: 32,
+    gap: 8,
+  },
+  galleryStripItem: {
+    width: 72,
+    height: 54,
+  },
+  galleryStripImage: {
+    width: 72,
+    height: 54,
+    borderRadius: 2,
+  },
+
+  // Challenge Gallery Section
+  challengeGallerySection: {
+    paddingHorizontal: 20,
+    marginTop: 28,
   },
   sectionLabel: {
-    ...Typography.labelMd,
-    color: Colors.textMuted,
-    marginBottom: 16,
-  },
-  challengeCard: {
-    backgroundColor: Colors.surfaceElevated,
-    borderRadius: 6,
-    padding: 24,
-  },
-  challengeHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  challengeCategory: {
-    ...Typography.labelSm,
-    color: Colors.textMuted,
-  },
-  challengeDiffBadge: {
-    backgroundColor: Colors.secondaryContainer,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  challengeDiffText: {
-    ...Typography.labelSm,
-    color: Colors.onSurfaceVariant,
-    fontSize: 10,
-  },
-  challengeTitle: {
     ...Typography.headlineSm,
     color: Colors.onBackground,
-    marginBottom: 10,
+    marginBottom: 16,
   },
-  challengeDesc: {
-    ...Typography.bodyMd,
-    color: Colors.onSurfaceVariant,
-    lineHeight: 22,
-  },
-  tipsSection: {
-    marginTop: 20,
-    paddingTop: 20,
-    backgroundColor: Colors.surfaceContainerLow,
-    marginHorizontal: -24,
-    marginBottom: -24,
-    padding: 24,
-    borderBottomLeftRadius: 6,
-    borderBottomRightRadius: 6,
-  },
-  tipsLabel: {
-    ...Typography.labelSm,
-    color: Colors.textMuted,
-    marginBottom: 12,
-  },
-  tipRow: {
+  imageGrid: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-    paddingRight: 8,
+    flexWrap: 'wrap',
+    gap: 8,
   },
-  tipDot: {
-    width: 4,
-    height: 4,
+  imageGridItem: {
+    width: '48.5%',
+  },
+  imageGridPlaceholder: {
+    width: '100%',
+    aspectRatio: 1.4,
     borderRadius: 2,
-    backgroundColor: Colors.primaryContainer,
-    marginRight: 10,
-    marginTop: 8,
-  },
-  tipText: {
-    ...Typography.bodySm,
-    color: Colors.onSurfaceVariant,
-    flex: 1,
-    lineHeight: 20,
   },
 
   // Recent Insights
   insightsSection: {
-    paddingLeft: 20,
+    paddingHorizontal: 20,
     marginTop: 32,
   },
   insightsRow: {
     gap: 12,
-    paddingRight: 20,
+    marginTop: 0,
   },
   insightCard: {
     width: 120,
