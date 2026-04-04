@@ -108,7 +108,11 @@ export default function TodayScreen() {
           <View style={styles.weekRow}>
             {DAYS.map((day, i) => {
               const done = currentUserStreak.thisWeek[i];
+<<<<<<< HEAD
               const isToday = i === todayIndex;
+=======
+              const isToday = i === new Date().getDay() - 1;
+>>>>>>> b0a7a6fd60b2eff3afe4ce6b65adadfdac94fbfe
               return (
                 <View key={i} style={styles.dayCol}>
                   <Text style={[styles.dayLabel, isToday && styles.dayLabelToday]}>

@@ -120,7 +120,11 @@ export default function ChallengesScreen() {
           renderItem={({ item }) => <ChallengeCard challenge={item} />}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+<<<<<<< HEAD
           ItemSeparatorComponent={ChallengeSeparator}
+=======
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+>>>>>>> b0a7a6fd60b2eff3afe4ce6b65adadfdac94fbfe
           ListHeaderComponent={
             <View style={styles.featuredCard}>
               <View style={styles.featuredImagePlaceholder}>
