@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  PanResponder,
+  Animated,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Colors from '../constants/Colors';
@@ -11,7 +18,8 @@ interface Quote {
 }
 
 interface Props {
-  quote: Quote;
+  quotes: Quote[];
+  initialIndex?: number;
 }
 
 // Pre-computed grain dots — deterministic, no Math.random() on render
@@ -22,75 +30,99 @@ const GRAIN = Array.from({ length: 200 }, (_, i) => ({
   size: 1 + ((i * 3) % 2),
 }));
 
-export default function QuoteCard({ quote }: Props) {
-  const [saved, setSaved] = useState(false);
+const SWIPE_THRESHOLD = 50;
+
+export default function QuoteCard({ quotes, initialIndex = 0 }: Props) {
+  const [index, setIndex] = useState(initialIndex);
+  const translateX = useRef(new Animated.Value(0)).current;
+
+  const quote = quotes[index];
+
+  const advance = () => {
+    Animated.sequence([
+      Animated.timing(translateX, {
+        toValue: -30,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateX, {
+        toValue: 0,
+        duration: 0,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    setIndex(i => (i + 1) % quotes.length);
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, { dx, dy }) =>
+        Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8,
+      onPanResponderRelease: (_, { dx }) => {
+        if (dx < -SWIPE_THRESHOLD) {
+          advance();
+        }
+      },
+    }),
+  ).current;
 
   return (
-    <View style={styles.wrapper}>
-      <LinearGradient
-        colors={['#1a1714', '#22201c', '#1e1c17']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.card}
-      >
-        {/* Film grain overlay */}
-        <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          {GRAIN.map((dot, i) => (
-            <View
-              key={i}
-              style={[
-                styles.grainDot,
-                {
-                  left: dot.left,
-                  top: dot.top,
-                  opacity: dot.opacity,
-                  width: dot.size,
-                  height: dot.size,
-                },
-              ]}
-            />
-          ))}
-        </View>
-
-        {/* Save / favourite button */}
-        <TouchableOpacity
-          style={styles.saveButton}
-          onPress={() => setSaved(s => !s)}
-          hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
-          activeOpacity={0.7}
+    <View style={styles.wrapper} {...panResponder.panHandlers}>
+      <Animated.View style={{ transform: [{ translateX }] }}>
+        <LinearGradient
+          colors={['#1a1714', '#22201c', '#1e1c17']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.card}
         >
-          <Ionicons
-            name={saved ? 'heart' : 'heart-outline'}
-            size={20}
-            color={saved ? Colors.primaryContainer : 'rgba(255,255,255,0.4)'}
-          />
-        </TouchableOpacity>
-
-        {/* Opening quotation mark */}
-        <Text style={styles.openingMark}>"</Text>
-
-        {/* Quote body */}
-        <Text style={styles.quoteText}>{quote.text}</Text>
-
-        {/* Accent rule */}
-        <View style={styles.divider} />
-
-        {/* Attribution */}
-        <Text style={styles.author}>— {quote.author}</Text>
-
-        {/* Saved badge */}
-        {saved && (
-          <View style={styles.savedBadge}>
-            <Ionicons
-              name="checkmark"
-              size={10}
-              color={Colors.primaryContainer}
-              style={{ marginRight: 4 }}
-            />
-            <Text style={styles.savedText}>SAVED TO FAVOURITES</Text>
+          {/* Film grain overlay */}
+          <View style={StyleSheet.absoluteFill} pointerEvents="none">
+            {GRAIN.map((dot, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.grainDot,
+                  {
+                    left: dot.left,
+                    top: dot.top,
+                    opacity: dot.opacity,
+                    width: dot.size,
+                    height: dot.size,
+                  },
+                ]}
+              />
+            ))}
           </View>
-        )}
-      </LinearGradient>
+
+          {/* Quote counter */}
+          <Text style={styles.counter}>
+            {index + 1} / {quotes.length}
+          </Text>
+
+          {/* Opening quotation mark */}
+          <Text style={styles.openingMark}>"</Text>
+
+          {/* Quote body */}
+          <Text style={styles.quoteText}>{quote.text}</Text>
+
+          {/* Accent rule */}
+          <View style={styles.divider} />
+
+          {/* Attribution */}
+          <Text style={styles.author}>— {quote.author}</Text>
+        </LinearGradient>
+      </Animated.View>
+
+      {/* Next arrow — right edge */}
+      <TouchableOpacity
+        style={styles.arrowButton}
+        onPress={advance}
+        hitSlop={{ top: 16, bottom: 16, left: 12, right: 12 }}
+        activeOpacity={0.6}
+      >
+        <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.55)" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -100,7 +132,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 32,
     borderRadius: 6,
-    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
@@ -111,6 +142,8 @@ const styles = StyleSheet.create({
     paddingTop: 28,
     paddingBottom: 28,
     paddingHorizontal: 24,
+    paddingRight: 48,
+    borderRadius: 6,
     overflow: 'hidden',
   },
   grainDot: {
@@ -118,10 +151,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#c8bdb0',
     borderRadius: 1,
   },
-  saveButton: {
-    position: 'absolute',
-    top: 18,
-    right: 18,
+  counter: {
+    ...Typography.labelSm,
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 10,
+    marginBottom: 12,
   },
   openingMark: {
     fontSize: 64,
@@ -150,22 +184,13 @@ const styles = StyleSheet.create({
     color: Colors.primaryContainer,
     opacity: 0.8,
   },
-  savedBadge: {
-    flexDirection: 'row',
+  arrowButton: {
+    position: 'absolute',
+    right: 14,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 16,
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(212,140,69,0.12)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 3,
-    borderWidth: 1,
-    borderColor: 'rgba(212,140,69,0.28)',
-  },
-  savedText: {
-    ...Typography.labelSm,
-    color: Colors.primaryContainer,
-    fontSize: 10,
-    letterSpacing: 1.4,
+    width: 32,
   },
 });

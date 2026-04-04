@@ -37,11 +37,10 @@ const CHALLENGE_GRID = [
 export default function TodayScreen() {
   const [uploadedUri, setUploadedUri] = useState<string | null>(null);
 
-  // Daily rotation: deterministic by calendar date
-  const quote = useMemo(() => {
-    const dayIndex = Math.floor(Date.now() / 86400000) % quotes.length;
-    return quotes[dayIndex];
-  }, []);
+  const dailyStartIndex = useMemo(
+    () => Math.floor(Date.now() / 86400000) % quotes.length,
+    [],
+  );
 
   const todayIndex = useMemo(() => new Date().getDay() - 1, []);
 
@@ -205,7 +204,7 @@ export default function TodayScreen() {
         </View>
 
         {/* Daily Inspiration Quote Card */}
-        <QuoteCard quote={quote} />
+        <QuoteCard quotes={quotes} initialIndex={dailyStartIndex} />
       </ScrollView>
     </SafeAreaView>
   );
