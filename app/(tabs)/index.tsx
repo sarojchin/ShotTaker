@@ -6,10 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-<<<<<<< HEAD
-  Image,
-=======
->>>>>>> 3598a4f3452aa4ae3b4d8a8c0906897067fc3a24
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -59,7 +55,6 @@ export default function TodayScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-<<<<<<< HEAD
         {/* Header Bar */}
         <View style={styles.headerBar}>
           <View style={styles.headerLeft}>
@@ -70,11 +65,6 @@ export default function TodayScreen() {
             <Ionicons name="camera-outline" size={24} color={Colors.onBackground} />
           </TouchableOpacity>
         </View>
-=======
-        {/* Header */}
-        <Text style={styles.header}>Today</Text>
-        <Text style={styles.subtitle}>{dateString}</Text>
->>>>>>> 3598a4f3452aa4ae3b4d8a8c0906897067fc3a24
 
         {/* Streak Hero */}
         <View style={styles.streakSection}>
@@ -100,11 +90,7 @@ export default function TodayScreen() {
           <View style={styles.weekRow}>
             {DAYS.map((day, i) => {
               const done = currentUserStreak.thisWeek[i];
-<<<<<<< HEAD
               const isToday = i === new Date().getDay() - 1;
-=======
-              const isToday = i === todayIndex;
->>>>>>> 3598a4f3452aa4ae3b4d8a8c0906897067fc3a24
               return (
                 <View key={i} style={styles.dayCol}>
                   <Text style={[styles.dayLabel, isToday && styles.dayLabelToday]}>

@@ -8,13 +8,8 @@ import Avatar from '../../components/Avatar';
 import { leaderboard } from '../../data/mockData';
 import { LeaderboardEntry } from '../../types';
 
-<<<<<<< HEAD
-=======
 const RowSeparator = () => <View style={styles.rowSep} />;
 
-const PODIUM_COLORS = [Colors.gold, Colors.silver, Colors.bronze];
-
->>>>>>> 3598a4f3452aa4ae3b4d8a8c0906897067fc3a24
 function PodiumCard({ entry, index }: { entry: LeaderboardEntry; index: number }) {
   const isFirst = index === 0;
   const podiumColors = [Colors.gold, Colors.silver, Colors.bronze];
