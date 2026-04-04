@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
@@ -123,7 +123,6 @@ export default function ChallengesScreen() {
           renderItem={({ item }) => <ChallengeCard challenge={item} />}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-<<<<<<< HEAD
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListHeaderComponent={
             // Featured challenge hero
@@ -141,9 +140,6 @@ export default function ChallengesScreen() {
               </View>
             </View>
           }
-=======
-          ItemSeparatorComponent={ChallengeSeparator}
->>>>>>> 3598a4f3452aa4ae3b4d8a8c0906897067fc3a24
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.emptyText}>No challenges match your filters.</Text>
