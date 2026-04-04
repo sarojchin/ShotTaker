@@ -8,6 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import Colors from '../constants/Colors';
 import Typography from '../constants/Typography';
 
@@ -112,6 +113,14 @@ export default function QuoteCard({ quotes, initialIndex = 0 }: Props) {
 
   return (
     <View style={styles.wrapper} {...panResponder.panHandlers}>
+      {/* Swipe hint arrows — static, behind the card */}
+      <View style={styles.arrowLeft} pointerEvents="none">
+        <Ionicons name="chevron-back" size={16} color="rgba(255,255,255,0.2)" />
+      </View>
+      <View style={styles.arrowRight} pointerEvents="none">
+        <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.2)" />
+      </View>
+
       <Animated.View
         style={[
           styles.cardContainer,
@@ -169,6 +178,20 @@ const styles = StyleSheet.create({
     marginTop: 32,
     height: 220,
     // overflow visible so the card can tilt outside bounds
+  },
+  arrowLeft: {
+    position: 'absolute',
+    left: -18,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+  },
+  arrowRight: {
+    position: 'absolute',
+    right: -18,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
   },
   cardContainer: {
     position: 'absolute',
