@@ -17,8 +17,8 @@ interface Props {
 export default function DifficultyBadge({ difficulty }: Props) {
   const color = difficultyColors[difficulty];
   return (
-    <View style={[styles.badge, { backgroundColor: color + '20', borderColor: color }]}>
-      <Text style={[styles.text, { color }]}>{difficulty}</Text>
+    <View style={[styles.badge, { backgroundColor: color + '15' }]}>
+      <Text style={[styles.text, { color }]}>{difficulty.toUpperCase()}</Text>
     </View>
   );
 }
@@ -27,12 +27,11 @@ const styles = StyleSheet.create({
   badge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 4,
     alignSelf: 'flex-start',
   },
   text: {
-    ...Typography.caption1,
-    fontWeight: '600',
+    ...Typography.labelSm,
+    fontSize: 10,
   },
 });

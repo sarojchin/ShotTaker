@@ -6,7 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  Platform,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,7 +14,6 @@ import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
-import ChallengeCard from '../../components/ChallengeCard';
 import { todayChallenge, currentUserStreak, quotes } from '../../data/mockData';
 
 const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -50,42 +49,42 @@ export default function TodayScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <Text style={styles.header}>Today</Text>
-        <Text style={styles.subtitle}>
-          {new Date().toLocaleDateString('en-US', {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </Text>
-
-        {/* Streak Banner */}
-        <LinearGradient
-          colors={['#FF6B35', '#FF9500']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.streakBanner}
-        >
-          <View style={styles.streakLeft}>
-            <Ionicons name="flame" size={36} color={Colors.white} />
-            <View>
-              <Text style={styles.streakCount}>{currentUserStreak.current} Day Streak</Text>
-              <Text style={styles.streakSub}>
-                Longest: {currentUserStreak.longest} days
-              </Text>
-            </View>
+        {/* Header Bar */}
+        <View style={styles.headerBar}>
+          <View style={styles.headerLeft}>
+            <Ionicons name="aperture" size={22} color={Colors.onBackground} />
+            <Text style={styles.brandName}>APERTURE</Text>
           </View>
-          <Text style={styles.streakEmoji}>🔥</Text>
-        </LinearGradient>
+          <TouchableOpacity>
+            <Ionicons name="camera-outline" size={24} color={Colors.onBackground} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Streak Hero */}
+        <View style={styles.streakSection}>
+          <Text style={styles.streakDays}>{currentUserStreak.current} Days</Text>
+          <Text style={styles.streakOnFire}>On Fire</Text>
+          <Text style={styles.streakDescription}>
+            You're maintaining a {currentUserStreak.current}-day streak.{'\n'}
+            Keep shooting to build your craft.
+          </Text>
+          <View style={styles.streakMeta}>
+            <Text style={styles.streakMetaLabel}>LONGEST: {currentUserStreak.longest} DAYS</Text>
+          </View>
+        </View>
+
+        {/* Role Badge */}
+        <View style={styles.roleBadge}>
+          <Ionicons name="eye-outline" size={16} color={Colors.primary} />
+          <Text style={styles.roleText}>Lead Observer</Text>
+        </View>
 
         {/* Week Strip */}
         <View style={styles.weekContainer}>
-          <Text style={styles.sectionTitle}>This Week</Text>
           <View style={styles.weekRow}>
             {DAYS.map((day, i) => {
               const done = currentUserStreak.thisWeek[i];
-              const isToday = i === new Date().getDay() - 1; // 0=Mon offset
+              const isToday = i === new Date().getDay() - 1;
               return (
                 <View key={i} style={styles.dayCol}>
                   <Text style={[styles.dayLabel, isToday && styles.dayLabelToday]}>
@@ -99,10 +98,8 @@ export default function TodayScreen() {
                     ]}
                   >
                     {done ? (
-                      <Ionicons name="checkmark" size={16} color={Colors.white} />
-                    ) : (
-                      <View style={styles.dayDot} />
-                    )}
+                      <Ionicons name="checkmark" size={14} color={Colors.white} />
+                    ) : null}
                   </View>
                 </View>
               );
@@ -110,36 +107,83 @@ export default function TodayScreen() {
           </View>
         </View>
 
-        {/* Daily Challenge */}
-        <Text style={styles.sectionTitle}>Daily Challenge</Text>
-        <ChallengeCard challenge={todayChallenge.challenge} showTips />
-
         {/* Upload CTA */}
         <TouchableOpacity
-          style={styles.uploadButton}
+          style={styles.uploadCard}
           onPress={handleUpload}
           activeOpacity={0.85}
         >
           <LinearGradient
-            colors={['#FF6B35', '#CC5529']}
+            colors={[Colors.primary, Colors.primaryContainer]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.uploadGradient}
           >
-            <Ionicons name="camera" size={24} color={Colors.white} />
-            <Text style={styles.uploadText}>
-              {uploadedUri ? 'Shot Uploaded ✓' : 'Upload Your Shot'}
+            <Ionicons name="camera" size={32} color={Colors.onPrimary} style={{ marginBottom: 12 }} />
+            <Text style={styles.uploadTitle}>
+              {uploadedUri ? 'SHOT UPLOADED' : 'UPLOAD YOUR DAILY SHOT'}
+            </Text>
+            <Text style={styles.uploadSubtitle}>
+              {uploadedUri
+                ? 'Great work — your streak continues.'
+                : 'Perfect your craft, one shot at a time.\nCapture and upload before midnight.'}
             </Text>
           </LinearGradient>
         </TouchableOpacity>
 
+        {/* Daily Challenge - "Leading Lines" style card */}
+        <View style={styles.challengeSection}>
+          <Text style={styles.sectionLabel}>TODAY'S CHALLENGE</Text>
+          <View style={styles.challengeCard}>
+            <View style={styles.challengeHeader}>
+              <Text style={styles.challengeCategory}>
+                {todayChallenge.challenge.category.toUpperCase()}
+              </Text>
+              <View style={styles.challengeDiffBadge}>
+                <Text style={styles.challengeDiffText}>
+                  {todayChallenge.challenge.difficulty.toUpperCase()}
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.challengeTitle}>{todayChallenge.challenge.title}</Text>
+            <Text style={styles.challengeDesc}>{todayChallenge.challenge.description}</Text>
+            {todayChallenge.challenge.tips.length > 0 && (
+              <View style={styles.tipsSection}>
+                <Text style={styles.tipsLabel}>QUICK TIPS</Text>
+                {todayChallenge.challenge.tips.map((tip, i) => (
+                  <View key={i} style={styles.tipRow}>
+                    <View style={styles.tipDot} />
+                    <Text style={styles.tipText}>{tip}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* Recent Insights */}
+        <View style={styles.insightsSection}>
+          <Text style={styles.sectionLabel}>RECENT INSIGHTS</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.insightsRow}
+          >
+            {[
+              { color: '#4a4a4a', label: 'Shadows' },
+              { color: '#6a7a5a', label: 'Nature' },
+              { color: '#8a7a6a', label: 'Urban' },
+            ].map((item, i) => (
+              <View key={i} style={styles.insightCard}>
+                <View style={[styles.insightImage, { backgroundColor: item.color }]} />
+                <Text style={styles.insightLabel}>{item.label}</Text>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+
         {/* Quote */}
         <View style={styles.quoteContainer}>
-          <Ionicons
-            name="chatbubble-ellipses-outline"
-            size={18}
-            color={Colors.textMuted}
-          />
           <Text style={styles.quoteText}>"{quote.text}"</Text>
           <Text style={styles.quoteAuthor}>— {quote.author}</Text>
         </View>
@@ -158,135 +202,270 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   content: {
-    padding: 20,
     paddingBottom: 40,
   },
-  header: {
-    ...Typography.largeTitle,
-    color: Colors.textPrimary,
-  },
-  subtitle: {
-    ...Typography.callout,
-    color: Colors.textSecondary,
-    marginTop: 4,
-    marginBottom: 24,
-  },
 
-  // Streak
-  streakBanner: {
+  // Header Bar
+  headerBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 28,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
-  streakLeft: {
+  headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    gap: 8,
   },
-  streakCount: {
-    ...Typography.title3,
-    color: Colors.white,
-  },
-  streakSub: {
-    ...Typography.footnote,
-    color: 'rgba(255,255,255,0.8)',
-    marginTop: 2,
-  },
-  streakEmoji: {
-    fontSize: 32,
+  brandName: {
+    ...Typography.labelLg,
+    color: Colors.onBackground,
+    fontSize: 15,
+    letterSpacing: 2,
   },
 
-  // Week
-  weekContainer: {
-    marginBottom: 28,
+  // Streak Hero
+  streakSection: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
-  sectionTitle: {
-    ...Typography.headline,
-    color: Colors.textPrimary,
-    marginBottom: 14,
+  streakDays: {
+    ...Typography.headlineLg,
+    color: Colors.onBackground,
+    fontSize: 36,
+    lineHeight: 42,
+  },
+  streakOnFire: {
+    ...Typography.headlineLg,
+    color: Colors.primaryContainer,
+    fontSize: 36,
+    lineHeight: 42,
+    fontStyle: 'italic',
+  },
+  streakDescription: {
+    ...Typography.bodyMd,
+    color: Colors.onSurfaceVariant,
+    marginTop: 12,
+    lineHeight: 21,
+  },
+  streakMeta: {
+    marginTop: 12,
+  },
+  streakMetaLabel: {
+    ...Typography.labelSm,
+    color: Colors.textMuted,
+  },
+
+  // Role Badge
+  roleBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: Colors.secondaryContainer,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 6,
+    marginHorizontal: 20,
+    marginTop: 16,
+    gap: 8,
+  },
+  roleText: {
+    ...Typography.labelMd,
+    color: Colors.primary,
+  },
+
+  // Week Strip
+  weekContainer: {
+    marginHorizontal: 20,
+    marginTop: 24,
+    backgroundColor: Colors.surfaceContainerLow,
+    borderRadius: 12,
+    padding: 16,
   },
   weekRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: Colors.surface,
-    borderRadius: 14,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: Colors.surfaceBorder,
   },
   dayCol: {
     alignItems: 'center',
     gap: 8,
   },
   dayLabel: {
-    ...Typography.caption1,
+    ...Typography.labelSm,
     color: Colors.textMuted,
-    fontWeight: '600',
+    fontSize: 11,
   },
   dayLabelToday: {
-    color: Colors.accent,
+    color: Colors.primary,
   },
   dayCircle: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: Colors.surfaceLight,
+    backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   dayCircleDone: {
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.primary,
   },
   dayCircleToday: {
-    borderWidth: 2,
-    borderColor: Colors.accent,
-    backgroundColor: 'transparent',
-  },
-  dayDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.textMuted,
+    backgroundColor: Colors.primaryContainer + '30',
   },
 
-  // Upload
-  uploadButton: {
+  // Upload CTA
+  uploadCard: {
+    marginHorizontal: 20,
     marginTop: 24,
-    borderRadius: 16,
+    borderRadius: 6,
     overflow: 'hidden',
   },
   uploadGradient: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 18,
-    gap: 10,
+    paddingVertical: 40,
+    paddingHorizontal: 24,
   },
-  uploadText: {
-    ...Typography.headline,
-    color: Colors.white,
-    fontSize: 18,
+  uploadTitle: {
+    ...Typography.labelLg,
+    color: Colors.onPrimary,
+    fontSize: 16,
+    letterSpacing: 2.5,
+    textAlign: 'center',
+  },
+  uploadSubtitle: {
+    ...Typography.bodySm,
+    color: 'rgba(255,255,255,0.8)',
+    textAlign: 'center',
+    marginTop: 8,
+    lineHeight: 18,
+  },
+
+  // Daily Challenge
+  challengeSection: {
+    paddingHorizontal: 20,
+    marginTop: 32,
+  },
+  sectionLabel: {
+    ...Typography.labelMd,
+    color: Colors.textMuted,
+    marginBottom: 16,
+  },
+  challengeCard: {
+    backgroundColor: Colors.surfaceElevated,
+    borderRadius: 6,
+    padding: 24,
+  },
+  challengeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  challengeCategory: {
+    ...Typography.labelSm,
+    color: Colors.textMuted,
+  },
+  challengeDiffBadge: {
+    backgroundColor: Colors.secondaryContainer,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  challengeDiffText: {
+    ...Typography.labelSm,
+    color: Colors.onSurfaceVariant,
+    fontSize: 10,
+  },
+  challengeTitle: {
+    ...Typography.headlineSm,
+    color: Colors.onBackground,
+    marginBottom: 10,
+  },
+  challengeDesc: {
+    ...Typography.bodyMd,
+    color: Colors.onSurfaceVariant,
+    lineHeight: 22,
+  },
+  tipsSection: {
+    marginTop: 20,
+    paddingTop: 20,
+    backgroundColor: Colors.surfaceContainerLow,
+    marginHorizontal: -24,
+    marginBottom: -24,
+    padding: 24,
+    borderBottomLeftRadius: 6,
+    borderBottomRightRadius: 6,
+  },
+  tipsLabel: {
+    ...Typography.labelSm,
+    color: Colors.textMuted,
+    marginBottom: 12,
+  },
+  tipRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+    paddingRight: 8,
+  },
+  tipDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.primaryContainer,
+    marginRight: 10,
+    marginTop: 8,
+  },
+  tipText: {
+    ...Typography.bodySm,
+    color: Colors.onSurfaceVariant,
+    flex: 1,
+    lineHeight: 20,
+  },
+
+  // Recent Insights
+  insightsSection: {
+    paddingLeft: 20,
+    marginTop: 32,
+  },
+  insightsRow: {
+    gap: 12,
+    paddingRight: 20,
+  },
+  insightCard: {
+    width: 120,
+  },
+  insightImage: {
+    width: 120,
+    height: 90,
+    borderRadius: 2,
+    marginBottom: 8,
+  },
+  insightLabel: {
+    ...Typography.labelSm,
+    color: Colors.onSurfaceVariant,
   },
 
   // Quote
   quoteContainer: {
     marginTop: 32,
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    gap: 8,
+    marginHorizontal: 20,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    backgroundColor: Colors.surfaceContainerLow,
+    borderRadius: 6,
   },
   quoteText: {
-    ...Typography.subhead,
-    color: Colors.textMuted,
-    textAlign: 'center',
+    ...Typography.bodyMd,
+    color: Colors.onSurfaceVariant,
     fontStyle: 'italic',
     lineHeight: 22,
   },
   quoteAuthor: {
-    ...Typography.caption1,
+    ...Typography.labelSm,
     color: Colors.textMuted,
+    marginTop: 10,
   },
 });

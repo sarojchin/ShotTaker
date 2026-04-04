@@ -1,5 +1,5 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, ThemeProvider } from '@react-navigation/native';
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -15,15 +15,15 @@ export const unstable_settings = {
 
 SplashScreen.preventAutoHideAsync();
 
-const AppDarkTheme = {
-  ...DarkTheme,
+const AppLightTheme = {
+  ...DefaultTheme,
   colors: {
-    ...DarkTheme.colors,
+    ...DefaultTheme.colors,
     background: Colors.background,
-    card: Colors.surface,
-    text: Colors.textPrimary,
-    border: Colors.surfaceBorder,
-    primary: Colors.accent,
+    card: Colors.surfaceElevated,
+    text: Colors.onBackground,
+    border: Colors.outlineVariant,
+    primary: Colors.primary,
   },
 };
 
@@ -48,7 +48,7 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={AppDarkTheme}>
+    <ThemeProvider value={AppLightTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
