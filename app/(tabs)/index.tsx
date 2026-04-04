@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../../constants/Colors';
@@ -43,7 +44,6 @@ export default function TodayScreen() {
   const todayIndex = useMemo(() => new Date().getDay() - 1, []);
 
   const handleUpload = async () => {
-    const ImagePicker = await import('expo-image-picker');
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       Alert.alert('Permission needed', 'Please allow photo access to upload your shot.');
