@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Animated,
   PanResponder,
+  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -159,15 +160,21 @@ export default function InspirationCard({ photo }: Props) {
 
             {/* ── BACK PANEL (Insight) ── */}
             <View style={[styles.panel, styles.insightPanel, { width: cardWidth, height: cardHeight }]}>
-              <View style={styles.insightContent}>
-                {/* Back swipe hint */}
-                <View style={styles.insightTopRow}>
-                  <Ionicons name="arrow-back" size={14} color="rgba(255,255,255,0.35)" />
-                  <Text style={styles.insightBackLabel}>PHOTO</Text>
-                  <View style={{ flex: 1 }} />
-                  <Text style={styles.insightHeading}>INSIGHT</Text>
-                </View>
+              {/* Fixed header row */}
+              <View style={styles.insightTopRow}>
+                <Ionicons name="arrow-back" size={14} color="rgba(255,255,255,0.35)" />
+                <Text style={styles.insightBackLabel}>PHOTO</Text>
+                <View style={{ flex: 1 }} />
+                <Text style={styles.insightHeading}>INSIGHT</Text>
+              </View>
 
+              {/* Scrollable content */}
+              <ScrollView
+                style={styles.insightScroll}
+                contentContainerStyle={styles.insightScrollContent}
+                showsVerticalScrollIndicator={false}
+                nestedScrollEnabled
+              >
                 {/* Photographer + year recap */}
                 <Text style={styles.insightPhotographer}>
                   {photo.photographer.toUpperCase()} · {photo.year}
@@ -186,11 +193,14 @@ export default function InspirationCard({ photo }: Props) {
                 <Text style={styles.insightSectionLabel}>TECHNIQUE</Text>
                 <Text style={styles.insightBody}>{photo.technique}</Text>
 
-                {/* Page indicator */}
-                <View style={styles.insightPageIndicator}>
-                  <View style={[styles.dash, styles.dashInactive]} />
-                  <View style={[styles.dash, styles.dashActive]} />
-                </View>
+                {/* Bottom breathing room */}
+                <View style={{ height: 8 }} />
+              </ScrollView>
+
+              {/* Fixed page indicator pinned to bottom */}
+              <View style={styles.insightPageIndicator}>
+                <View style={[styles.dash, styles.dashInactive]} />
+                <View style={[styles.dash, styles.dashActive]} />
               </View>
             </View>
           </Animated.View>
@@ -298,18 +308,15 @@ const styles = StyleSheet.create({
   // ── Back / Insight ──
   insightPanel: {
     backgroundColor: Colors.inverseSurface,
-  },
-  insightContent: {
     flex: 1,
-    padding: 20,
-    paddingTop: 22,
-    justifyContent: 'flex-start',
   },
   insightTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
     gap: 6,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
   },
   insightBackLabel: {
     ...Typography.labelSm,
@@ -321,6 +328,13 @@ const styles = StyleSheet.create({
     ...Typography.labelMd,
     color: Colors.primaryContainer,
     letterSpacing: 2.5,
+  },
+  insightScroll: {
+    flex: 1,
+  },
+  insightScrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 12,
   },
   insightPhotographer: {
     ...Typography.labelSm,
@@ -359,7 +373,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginTop: 'auto',
-    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderTopWidth: 0,
   },
 });
