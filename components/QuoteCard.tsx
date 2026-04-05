@@ -62,7 +62,7 @@ export default function QuoteCard({ quote }: QuoteCardProps) {
       <View style={styles.card}>
         {/* Header row */}
         <View style={styles.header}>
-          <Text style={styles.label}>DAILY REFLECTION</Text>
+          <Text style={styles.label}>QUOTES</Text>
           <Text style={styles.openQuoteMark}>{'\u201C'}</Text>
         </View>
 
