@@ -35,3 +35,9 @@ export interface LeaderboardEntry {
   profile: Profile;
   isCurrentUser: boolean;
 }
+
+export interface LocalPhoto {
+  dateKey: string;   // 'YYYY-MM-DD'
+  localPath: string; // persistent file:// URI
+  label?: string;
+}

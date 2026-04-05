@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Alert,
   Modal,
   Pressable,
+  Image,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
@@ -25,7 +26,19 @@ import DailyTipCard from '../../components/DailyTipCard';
 import { currentUserStreak, quotes } from '../../data/mockData';
 import inspirations from '../../data/inspirations';
 import dailyTips from '../../data/dailyTips';
+import { savePhoto, getPhotos } from '../../services/photoStorage';
+import { LocalPhoto } from '../../types';
 
+// Placeholder colors + labels mapped by day-index (0 = today, 1 = yesterday, …)
+const PLACEHOLDER_SLOTS = [
+  { color: '#4a3a2a', label: 'Morning Light' },
+  { color: '#2a3a4a', label: 'Street Scene' },
+  { color: '#3a4a2a', label: 'Shadows' },
+  { color: '#4a2a3a', label: 'Geometry' },
+  { color: '#5a4a2a', label: 'Golden Hour' },
+  { color: '#2a4a3a', label: 'Still Life' },
+  { color: '#3a2a4a', label: 'Texture' },
+];
 
 // Placeholder gallery images (mock colors representing photos)
 const GALLERY_STRIP = [
@@ -36,21 +49,55 @@ const GALLERY_STRIP = [
   { color: '#5a3a4a', label: 'Bridges' },
 ];
 
-const YOUR_PICTURES = [
-  { id: 1, color: '#4a3a2a', label: 'Morning Light', date: 'Apr 5', hasPhoto: true },
-  { id: 2, color: '#2a3a4a', label: 'Street Scene', date: 'Apr 4', hasPhoto: true },
-  { id: 3, color: '#3a4a2a', label: 'Shadows', date: 'Apr 3', hasPhoto: false },
-  { id: 4, color: '#4a2a3a', label: 'Geometry', date: 'Apr 2', hasPhoto: true },
-  { id: 5, color: '#5a4a2a', label: 'Golden Hour', date: 'Apr 1', hasPhoto: false },
-  { id: 6, color: '#2a4a3a', label: 'Still Life', date: 'Mar 31', hasPhoto: true },
-  { id: 7, color: '#3a2a4a', label: 'Texture', date: 'Mar 30', hasPhoto: true },
-];
+/** Format a Date as 'Apr 5' style label */
+function formatDisplayDate(d: Date): string {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
 
-type Picture = typeof YOUR_PICTURES[0];
+/** Format a Date as 'YYYY-MM-DD' key */
+function toDateKey(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+/** Build the last 7 day slots starting from today */
+function buildDaySlots() {
+  const today = new Date();
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    return {
+      dateKey: toDateKey(d),
+      displayDate: formatDisplayDate(d),
+      ...PLACEHOLDER_SLOTS[i],
+    };
+  });
+}
+
+type DaySlot = ReturnType<typeof buildDaySlots>[0];
+
+interface ExpandedPicture {
+  slot: DaySlot;
+  localPath?: string;
+}
 
 export default function TodayScreen() {
   const [uploadedUri, setUploadedUri] = useState<string | null>(null);
-  const [expandedPicture, setExpandedPicture] = useState<Picture | null>(null);
+  const [savedPhotos, setSavedPhotos] = useState<LocalPhoto[]>([]);
+  const [expandedPicture, setExpandedPicture] = useState<ExpandedPicture | null>(null);
+
+  const daySlots = useMemo(() => buildDaySlots(), []);
+  const todayDateKey = daySlots[0].dateKey;
+
+  // Load persisted photos on mount
+  useEffect(() => {
+    getPhotos().then(setSavedPhotos);
+  }, []);
+
+  // Keep uploadedUri in sync with stored photos for today
+  useEffect(() => {
+    const todayPhoto = savedPhotos.find((p) => p.dateKey === todayDateKey);
+    if (todayPhoto) setUploadedUri(todayPhoto.localPath);
+  }, [savedPhotos, todayDateKey]);
 
   const quote = useMemo(
     () => quotes[Math.floor(Math.random() * quotes.length)],
@@ -76,10 +123,31 @@ export default function TodayScreen() {
       quality: 0.8,
     });
     if (!result.canceled && result.assets[0]) {
-      setUploadedUri(result.assets[0].uri);
+      const photo = await savePhoto(result.assets[0].uri, todayDateKey, daySlots[0].label);
+      const updated = await getPhotos();
+      setSavedPhotos(updated);
+      setUploadedUri(photo.localPath);
       Alert.alert('Shot uploaded!', 'Nice work — your streak continues.');
     }
   };
+
+  function getSlotPhoto(dateKey: string): LocalPhoto | undefined {
+    return savedPhotos.find((p) => p.dateKey === dateKey);
+  }
+
+  function handleSlotPress(slot: DaySlot) {
+    const real = getSlotPhoto(slot.dateKey);
+    if (real) {
+      setExpandedPicture({ slot, localPath: real.localPath });
+    } else {
+      // Placeholder slots that "have a photo" can still be tapped to preview the mock
+      setExpandedPicture({ slot });
+    }
+  }
+
+  // Determine which placeholder slots should show as "has photo" (mock data for past days)
+  // Index 0 is today — only show as having a photo if really uploaded
+  const MOCK_HAS_PHOTO = [false, true, false, true, false, true, true];
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -158,30 +226,36 @@ export default function TodayScreen() {
           contentContainerStyle={styles.yourPicturesRow}
           style={styles.yourPicturesScroll}
         >
-          {YOUR_PICTURES.map((pic) => (
-            <TouchableOpacity
-              key={pic.id}
-              style={styles.yourPictureItem}
-              onPress={() => pic.hasPhoto && setExpandedPicture(pic)}
-              activeOpacity={pic.hasPhoto ? 0.8 : 1}
-            >
-              <View
-                style={[
-                  styles.yourPictureThumbnail,
-                  pic.hasPhoto
-                    ? { backgroundColor: pic.color }
-                    : styles.yourPictureMissed,
-                ]}
+          {daySlots.map((slot, i) => {
+            const realPhoto = getSlotPhoto(slot.dateKey);
+            const mockHasPhoto = i > 0 && MOCK_HAS_PHOTO[i];
+            const tappable = Boolean(realPhoto) || mockHasPhoto;
+
+            return (
+              <TouchableOpacity
+                key={slot.dateKey}
+                style={styles.yourPictureItem}
+                onPress={() => tappable && handleSlotPress(slot)}
+                activeOpacity={tappable ? 0.8 : 1}
               >
-                {!pic.hasPhoto && (
-                  <Ionicons name="camera-outline" size={18} color={Colors.outlineVariant} />
+                {realPhoto ? (
+                  <Image
+                    source={{ uri: realPhoto.localPath }}
+                    style={styles.yourPictureThumbnail}
+                  />
+                ) : mockHasPhoto ? (
+                  <View style={[styles.yourPictureThumbnail, { backgroundColor: slot.color }]} />
+                ) : (
+                  <View style={[styles.yourPictureThumbnail, styles.yourPictureMissed]}>
+                    <Ionicons name="camera-outline" size={18} color={Colors.outlineVariant} />
+                  </View>
                 )}
-              </View>
-              <Text style={[styles.yourPictureDate, !pic.hasPhoto && styles.yourPictureDateMuted]}>
-                {pic.date}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Text style={[styles.yourPictureDate, !tappable && !realPhoto && styles.yourPictureDateMuted]}>
+                  {slot.displayDate}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
 
         {/* Expanded Picture Modal */}
@@ -193,10 +267,17 @@ export default function TodayScreen() {
         >
           <Pressable style={styles.modalOverlay} onPress={() => setExpandedPicture(null)}>
             <Pressable style={styles.modalContent} onPress={() => {}}>
-              <View style={[styles.modalImage, { backgroundColor: expandedPicture?.color }]} />
+              {expandedPicture?.localPath ? (
+                <Image
+                  source={{ uri: expandedPicture.localPath }}
+                  style={styles.modalImage}
+                />
+              ) : (
+                <View style={[styles.modalImage, { backgroundColor: expandedPicture?.slot.color }]} />
+              )}
               <View style={styles.modalMeta}>
-                <Text style={styles.modalLabel}>{expandedPicture?.label}</Text>
-                <Text style={styles.modalDate}>{expandedPicture?.date}</Text>
+                <Text style={styles.modalLabel}>{expandedPicture?.slot.label}</Text>
+                <Text style={styles.modalDate}>{expandedPicture?.slot.displayDate}</Text>
               </View>
               <TouchableOpacity style={styles.modalClose} onPress={() => setExpandedPicture(null)}>
                 <Ionicons name="close" size={20} color={Colors.onBackground} />
