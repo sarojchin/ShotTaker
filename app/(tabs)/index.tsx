@@ -29,12 +29,13 @@ const GALLERY_STRIP = [
 ];
 
 const YOUR_PICTURES = [
-  { id: 1, color: '#4a3a2a', label: 'Morning Light', date: 'Apr 5' },
-  { id: 2, color: '#2a3a4a', label: 'Street Scene', date: 'Apr 4' },
-  { id: 3, color: '#3a4a2a', label: 'Shadows', date: 'Apr 3' },
-  { id: 4, color: '#4a2a3a', label: 'Geometry', date: 'Apr 2' },
-  { id: 5, color: '#5a4a2a', label: 'Golden Hour', date: 'Apr 1' },
-  { id: 6, color: '#2a4a3a', label: 'Still Life', date: 'Mar 31' },
+  { id: 1, color: '#4a3a2a', label: 'Morning Light', date: 'Apr 5', hasPhoto: true },
+  { id: 2, color: '#2a3a4a', label: 'Street Scene', date: 'Apr 4', hasPhoto: true },
+  { id: 3, color: '#3a4a2a', label: 'Shadows', date: 'Apr 3', hasPhoto: false },
+  { id: 4, color: '#4a2a3a', label: 'Geometry', date: 'Apr 2', hasPhoto: true },
+  { id: 5, color: '#5a4a2a', label: 'Golden Hour', date: 'Apr 1', hasPhoto: false },
+  { id: 6, color: '#2a4a3a', label: 'Still Life', date: 'Mar 31', hasPhoto: true },
+  { id: 7, color: '#3a2a4a', label: 'Texture', date: 'Mar 30', hasPhoto: true },
 ];
 
 const CHALLENGE_GRID = [
@@ -148,20 +149,38 @@ export default function TodayScreen() {
         {/* Your Pictures */}
         <View style={styles.yourPicturesSection}>
           <Text style={styles.yourPicturesHeading}>Your Pictures</Text>
-          <View style={styles.yourPicturesGrid}>
-            {YOUR_PICTURES.map((pic) => (
-              <TouchableOpacity
-                key={pic.id}
-                style={styles.yourPictureItem}
-                onPress={() => setExpandedPicture(pic)}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.yourPictureThumbnail, { backgroundColor: pic.color }]} />
-                <Text style={styles.yourPictureDate}>{pic.date}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
         </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.yourPicturesRow}
+          style={styles.yourPicturesScroll}
+        >
+          {YOUR_PICTURES.map((pic) => (
+            <TouchableOpacity
+              key={pic.id}
+              style={styles.yourPictureItem}
+              onPress={() => pic.hasPhoto && setExpandedPicture(pic)}
+              activeOpacity={pic.hasPhoto ? 0.8 : 1}
+            >
+              <View
+                style={[
+                  styles.yourPictureThumbnail,
+                  pic.hasPhoto
+                    ? { backgroundColor: pic.color }
+                    : styles.yourPictureMissed,
+                ]}
+              >
+                {!pic.hasPhoto && (
+                  <Ionicons name="camera-outline" size={18} color={Colors.outlineVariant} />
+                )}
+              </View>
+              <Text style={[styles.yourPictureDate, !pic.hasPhoto && styles.yourPictureDateMuted]}>
+                {pic.date}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
 
         {/* Expanded Picture Modal */}
         <Modal
@@ -377,23 +396,33 @@ const styles = StyleSheet.create({
     color: Colors.onBackground,
     marginBottom: 14,
   },
-  yourPicturesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  yourPicturesScroll: {
+    marginTop: 0,
+  },
+  yourPicturesRow: {
+    paddingHorizontal: 20,
     gap: 8,
   },
   yourPictureItem: {
-    width: '31%',
+    width: 72,
   },
   yourPictureThumbnail: {
-    width: '100%',
-    aspectRatio: 1,
+    width: 72,
+    height: 72,
     borderRadius: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  yourPictureMissed: {
+    backgroundColor: Colors.surfaceContainerHigh,
   },
   yourPictureDate: {
     ...Typography.labelSm,
     color: Colors.textMuted,
     marginTop: 5,
+  },
+  yourPictureDateMuted: {
+    color: Colors.outlineVariant,
   },
 
   // Expanded Picture Modal
