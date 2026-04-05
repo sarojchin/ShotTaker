@@ -16,11 +16,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
 import StreakCalendar from '../../components/StreakCalendar';
-<<<<<<< HEAD
+
 import QuoteCard from '../../components/QuoteCard';
-=======
+
 import InspirationCard from '../../components/InspirationCard';
->>>>>>> claude/inspiration-card-swipe-czACB
+
 import { todayChallenge, currentUserStreak, quotes } from '../../data/mockData';
 import inspirations from '../../data/inspirations';
 
