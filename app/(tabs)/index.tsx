@@ -42,6 +42,13 @@ interface DaySlot {
   photo: LocalPhoto | null;
 }
 
+function localDateKey(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function buildDaySlots(photos: LocalPhoto[]): DaySlot[] {
   const photoMap = new Map(photos.map((p) => [p.dateKey, p]));
   const slots: DaySlot[] = [];
@@ -50,7 +57,7 @@ function buildDaySlots(photos: LocalPhoto[]): DaySlot[] {
   for (let i = 0; i < 7; i++) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    const dateKey = d.toISOString().slice(0, 10);
+    const dateKey = localDateKey(d);
     const dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     slots.push({
       dateKey,
@@ -128,8 +135,7 @@ export default function TodayScreen() {
         {/* Upload CTA */}
         <ShotUploadCard
           onUploadComplete={(uri) => {
-            const todayKey = new Date().toISOString().slice(0, 10);
-            savePhoto(uri, todayKey);
+            savePhoto(uri, localDateKey(new Date()));
             loadPhotos();
           }}
         />
