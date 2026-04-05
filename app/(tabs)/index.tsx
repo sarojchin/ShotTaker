@@ -90,7 +90,7 @@ export default function TodayScreen() {
 
   // Load persisted photos on mount
   useEffect(() => {
-    getPhotos().then(setSavedPhotos);
+    setSavedPhotos(getPhotos());
   }, []);
 
   // Keep uploadedUri in sync with stored photos for today
@@ -123,9 +123,8 @@ export default function TodayScreen() {
       quality: 0.8,
     });
     if (!result.canceled && result.assets[0]) {
-      const photo = await savePhoto(result.assets[0].uri, todayDateKey, daySlots[0].label);
-      const updated = await getPhotos();
-      setSavedPhotos(updated);
+      const photo = savePhoto(result.assets[0].uri, todayDateKey, daySlots[0].label);
+      setSavedPhotos(getPhotos());
       setUploadedUri(photo.localPath);
       Alert.alert('Shot uploaded!', 'Nice work — your streak continues.');
     }
