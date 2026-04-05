@@ -13,50 +13,12 @@ interface QuoteCardProps {
   quote: Quote;
 }
 
-function DotGrid() {
-  const rows = 9;
-  const cols = 3;
-  return (
-    <View style={dotStyles.grid}>
-      {Array.from({ length: rows }).map((_, r) => (
-        <View key={r} style={dotStyles.row}>
-          {Array.from({ length: cols }).map((_, c) => (
-            <View key={c} style={dotStyles.dot} />
-          ))}
-        </View>
-      ))}
-    </View>
-  );
-}
-
-const dotStyles = StyleSheet.create({
-  grid: {
-    flexDirection: 'column',
-    gap: 7,
-    paddingTop: 10,
-    paddingHorizontal: 6,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 7,
-  },
-  dot: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-  },
-});
-
 export default function QuoteCard({ quote }: QuoteCardProps) {
   return (
     <View style={styles.section}>
       {/* Background patches */}
       <View style={styles.patchGreen} />
       <View style={styles.patchGold} />
-      <View style={styles.patchDark}>
-        <DotGrid />
-      </View>
 
       {/* Elevated white card */}
       <View style={styles.card}>
@@ -101,36 +63,24 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: '55%',
-    backgroundColor: '#8fa896', // muted sage green
-    borderRadius: 8,
+    backgroundColor: '#8fa896',
   },
   patchGold: {
     position: 'absolute',
-    right: 28,
+    right: 0,
     top: 0,
     height: '55%',
     width: '50%',
-    backgroundColor: '#c9b55a', // warm gold
-  },
-  patchDark: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: 28,
-    backgroundColor: '#1e2535', // dark navy
-    alignItems: 'center',
+    backgroundColor: '#c9b55a',
   },
 
   // White elevated card
   card: {
-    marginRight: 28, // leave room for dark stripe
     backgroundColor: Colors.surfaceElevated,
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 24,
-    // Ambient shadow
     shadowColor: Colors.onBackground,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.07,
