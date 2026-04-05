@@ -135,8 +135,11 @@ export default function TodayScreen() {
         {/* Upload CTA */}
         <ShotUploadCard
           onUploadComplete={(uri) => {
-            savePhoto(uri, localDateKey(new Date()));
-            loadPhotos();
+            const photo = savePhoto(uri, localDateKey(new Date()));
+            setPhotos((prev) => {
+              const without = prev.filter((p) => p.dateKey !== photo.dateKey);
+              return [...without, photo].sort((a, b) => b.dateKey.localeCompare(a.dateKey));
+            });
           }}
         />
 
