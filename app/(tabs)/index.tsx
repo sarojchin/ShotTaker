@@ -6,6 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Modal,
+  Pressable,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
@@ -26,6 +28,15 @@ const GALLERY_STRIP = [
   { color: '#5a3a4a', label: 'Bridges' },
 ];
 
+const YOUR_PICTURES = [
+  { id: 1, color: '#4a3a2a', label: 'Morning Light', date: 'Apr 5' },
+  { id: 2, color: '#2a3a4a', label: 'Street Scene', date: 'Apr 4' },
+  { id: 3, color: '#3a4a2a', label: 'Shadows', date: 'Apr 3' },
+  { id: 4, color: '#4a2a3a', label: 'Geometry', date: 'Apr 2' },
+  { id: 5, color: '#5a4a2a', label: 'Golden Hour', date: 'Apr 1' },
+  { id: 6, color: '#2a4a3a', label: 'Still Life', date: 'Mar 31' },
+];
+
 const CHALLENGE_GRID = [
   { color: '#4a4a4a', aspect: 1 },
   { color: '#5a6a5a', aspect: 1 },
@@ -33,8 +44,11 @@ const CHALLENGE_GRID = [
   { color: '#3a4a5a', aspect: 1 },
 ];
 
+type Picture = typeof YOUR_PICTURES[0];
+
 export default function TodayScreen() {
   const [uploadedUri, setUploadedUri] = useState<string | null>(null);
+  const [expandedPicture, setExpandedPicture] = useState<Picture | null>(null);
 
   const quote = useMemo(
     () => quotes[Math.floor(Math.random() * quotes.length)],
@@ -130,6 +144,45 @@ export default function TodayScreen() {
             </Text>
           </LinearGradient>
         </TouchableOpacity>
+
+        {/* Your Pictures */}
+        <View style={styles.yourPicturesSection}>
+          <Text style={styles.yourPicturesHeading}>Your Pictures</Text>
+          <View style={styles.yourPicturesGrid}>
+            {YOUR_PICTURES.map((pic) => (
+              <TouchableOpacity
+                key={pic.id}
+                style={styles.yourPictureItem}
+                onPress={() => setExpandedPicture(pic)}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.yourPictureThumbnail, { backgroundColor: pic.color }]} />
+                <Text style={styles.yourPictureDate}>{pic.date}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Expanded Picture Modal */}
+        <Modal
+          visible={expandedPicture !== null}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setExpandedPicture(null)}
+        >
+          <Pressable style={styles.modalOverlay} onPress={() => setExpandedPicture(null)}>
+            <Pressable style={styles.modalContent} onPress={() => {}}>
+              <View style={[styles.modalImage, { backgroundColor: expandedPicture?.color }]} />
+              <View style={styles.modalMeta}>
+                <Text style={styles.modalLabel}>{expandedPicture?.label}</Text>
+                <Text style={styles.modalDate}>{expandedPicture?.date}</Text>
+              </View>
+              <TouchableOpacity style={styles.modalClose} onPress={() => setExpandedPicture(null)}>
+                <Ionicons name="close" size={20} color={Colors.onBackground} />
+              </TouchableOpacity>
+            </Pressable>
+          </Pressable>
+        </Modal>
 
         {/* Gallery Strip — horizontal thumbnail row */}
         <ScrollView
@@ -312,6 +365,78 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
     lineHeight: 18,
+  },
+
+  // Your Pictures
+  yourPicturesSection: {
+    paddingHorizontal: 20,
+    marginTop: 24,
+  },
+  yourPicturesHeading: {
+    ...Typography.titleMd,
+    color: Colors.onBackground,
+    marginBottom: 14,
+  },
+  yourPicturesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  yourPictureItem: {
+    width: '31%',
+  },
+  yourPictureThumbnail: {
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: 2,
+  },
+  yourPictureDate: {
+    ...Typography.labelSm,
+    color: Colors.textMuted,
+    marginTop: 5,
+  },
+
+  // Expanded Picture Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(28,27,27,0.85)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    width: '100%',
+    backgroundColor: Colors.surfaceElevated,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  modalImage: {
+    width: '100%',
+    aspectRatio: 1,
+  },
+  modalMeta: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  modalLabel: {
+    ...Typography.titleSm,
+    color: Colors.onBackground,
+  },
+  modalDate: {
+    ...Typography.labelSm,
+    color: Colors.textMuted,
+    marginTop: 4,
+  },
+  modalClose: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(252,249,248,0.85)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // Gallery Strip
