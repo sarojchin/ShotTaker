@@ -96,8 +96,8 @@ export default function TodayScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Streak Hero */}
-        <View style={styles.streakSection}>
+        {/* Streak Hero Card */}
+        <View style={styles.heroCard}>
           <Text style={styles.streakDays}>{currentUserStreak.current} Days</Text>
           <Text style={styles.streakOnFire}>
             {currentUserStreak.current > 0 ? 'On Fire' : 'Ready to Start'}
@@ -110,19 +110,6 @@ export default function TodayScreen() {
           <View style={styles.streakMeta}>
             <Text style={styles.streakMetaLabel}>LONGEST: {currentUserStreak.longest} DAYS</Text>
           </View>
-        </View>
-
-        {/* Level Indicator */}
-        <View style={styles.levelRow}>
-          <Ionicons name="chevron-back" size={14} color={Colors.textMuted} />
-          <Text style={styles.levelText}>LEVEL</Text>
-          <Ionicons name="chevron-forward" size={14} color={Colors.textMuted} />
-        </View>
-
-        {/* Role Badge */}
-        <View style={styles.roleBadge}>
-          <Ionicons name="eye-outline" size={16} color={Colors.primary} />
-          <Text style={styles.roleText}>Lead Observer</Text>
         </View>
 
         {/* Streak Calendar */}
@@ -302,11 +289,21 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
 
-  // Streak Hero
-  streakSection: {
+  // Streak Hero Card
+  heroCard: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    marginBottom: 8,
+    backgroundColor: Colors.surfaceElevated,
+    borderRadius: 6,
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingTop: 24,
+    paddingBottom: 24,
+    shadowColor: Colors.onBackground,
+    shadowOpacity: 0.04,
+    shadowRadius: 40,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 2,
   },
   streakDays: {
     ...Typography.headlineLg,
@@ -334,38 +331,6 @@ const styles = StyleSheet.create({
     ...Typography.labelSm,
     color: Colors.textMuted,
   },
-
-  // Level Indicator
-  levelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginHorizontal: 20,
-    marginTop: 12,
-  },
-  levelText: {
-    ...Typography.labelSm,
-    color: Colors.textMuted,
-  },
-
-  // Role Badge
-  roleBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: Colors.secondaryContainer,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 6,
-    marginHorizontal: 20,
-    marginTop: 16,
-    gap: 8,
-  },
-  roleText: {
-    ...Typography.labelMd,
-    color: Colors.primary,
-  },
-
 
   // Upload CTA
   uploadCard: {
