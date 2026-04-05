@@ -20,9 +20,11 @@ import StreakCalendar from '../../components/StreakCalendar';
 import QuoteCard from '../../components/QuoteCard';
 
 import InspirationCard from '../../components/InspirationCard';
+import DailyTipCard from '../../components/DailyTipCard';
 
-import { todayChallenge, currentUserStreak, quotes } from '../../data/mockData';
+import { currentUserStreak, quotes } from '../../data/mockData';
 import inspirations from '../../data/inspirations';
+import dailyTips from '../../data/dailyTips';
 
 
 // Placeholder gallery images (mock colors representing photos)
@@ -44,13 +46,6 @@ const YOUR_PICTURES = [
   { id: 7, color: '#3a2a4a', label: 'Texture', date: 'Mar 30', hasPhoto: true },
 ];
 
-const CHALLENGE_GRID = [
-  { color: '#4a4a4a', aspect: 1 },
-  { color: '#5a6a5a', aspect: 1 },
-  { color: '#7a6a5a', aspect: 1 },
-  { color: '#3a4a5a', aspect: 1 },
-];
-
 type Picture = typeof YOUR_PICTURES[0];
 
 export default function TodayScreen() {
@@ -61,6 +56,14 @@ export default function TodayScreen() {
     () => quotes[Math.floor(Math.random() * quotes.length)],
     [],
   );
+
+  // Pick tip deterministically by calendar day so it rotates daily
+  const todayTip = useMemo(() => {
+    const dayOfYear = Math.floor(
+      (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000,
+    );
+    return dailyTips[dayOfYear % dailyTips.length];
+  }, []);
 
   const handleUpload = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -216,16 +219,9 @@ export default function TodayScreen() {
           ))}
         </ScrollView>
 
-        {/* Today's Challenge Gallery — "Leading Lines" */}
-        <View style={styles.challengeGallerySection}>
-          <Text style={styles.sectionLabel}>{todayChallenge.challenge.title}</Text>
-          <View style={styles.imageGrid}>
-            {CHALLENGE_GRID.map((item, i) => (
-              <View key={i} style={styles.imageGridItem}>
-                <View style={[styles.imageGridPlaceholder, { backgroundColor: item.color }]} />
-              </View>
-            ))}
-          </View>
+        {/* Daily Tip Card */}
+        <View style={styles.dailyTipSection}>
+          <DailyTipCard tip={todayTip} />
         </View>
 
         {/* Recent Insights */}
@@ -471,28 +467,16 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
 
-  // Challenge Gallery Section
-  challengeGallerySection: {
+  // Daily Tip Section
+  dailyTipSection: {
     paddingHorizontal: 20,
     marginTop: 28,
   },
+
   sectionLabel: {
     ...Typography.headlineSm,
     color: Colors.onBackground,
     marginBottom: 16,
-  },
-  imageGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  imageGridItem: {
-    width: '48.5%',
-  },
-  imageGridPlaceholder: {
-    width: '100%',
-    aspectRatio: 1.4,
-    borderRadius: 2,
   },
 
   // Recent Insights
