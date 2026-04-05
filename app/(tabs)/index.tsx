@@ -16,7 +16,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
 import StreakCalendar from '../../components/StreakCalendar';
+import InspirationCard from '../../components/InspirationCard';
 import { todayChallenge, currentUserStreak, quotes } from '../../data/mockData';
+import inspirations from '../../data/inspirations';
 
 
 // Placeholder gallery images (mock colors representing photos)
@@ -145,6 +147,12 @@ export default function TodayScreen() {
             </Text>
           </LinearGradient>
         </TouchableOpacity>
+
+        {/* Inspiration Card */}
+        <View style={styles.inspirationSection}>
+          <Text style={styles.inspirationHeading}>Today's Inspiration</Text>
+          <InspirationCard photo={inspirations[0]} />
+        </View>
 
         {/* Your Pictures */}
         <View style={styles.yourPicturesSection}>
@@ -384,6 +392,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
     lineHeight: 18,
+  },
+
+  // Inspiration
+  inspirationSection: {
+    paddingHorizontal: 20,
+    marginTop: 28,
+  },
+  inspirationHeading: {
+    ...Typography.titleMd,
+    color: Colors.onBackground,
+    marginBottom: 14,
   },
 
   // Your Pictures
