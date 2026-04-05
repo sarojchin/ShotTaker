@@ -13,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
+import QuoteCard from '../../components/QuoteCard';
 import { todayChallenge, currentUserStreak, quotes } from '../../data/mockData';
 
 const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -36,8 +37,8 @@ const CHALLENGE_GRID = [
 export default function TodayScreen() {
   const [uploadedUri, setUploadedUri] = useState<string | null>(null);
 
-  const quote = useMemo(
-    () => quotes[Math.floor(Math.random() * quotes.length)],
+  const dailyStartIndex = useMemo(
+    () => Math.floor(Date.now() / 86400000) % quotes.length,
     [],
   );
 
@@ -108,11 +109,7 @@ export default function TodayScreen() {
           <View style={styles.weekRow}>
             {DAYS.map((day, i) => {
               const done = currentUserStreak.thisWeek[i];
-<<<<<<< HEAD
               const isToday = i === todayIndex;
-=======
-              const isToday = i === new Date().getDay() - 1;
->>>>>>> b0a7a6fd60b2eff3afe4ce6b65adadfdac94fbfe
               return (
                 <View key={i} style={styles.dayCol}>
                   <Text style={[styles.dayLabel, isToday && styles.dayLabelToday]}>
@@ -206,11 +203,8 @@ export default function TodayScreen() {
           </ScrollView>
         </View>
 
-        {/* Quote */}
-        <View style={styles.quoteContainer}>
-          <Text style={styles.quoteText}>"{quote.text}"</Text>
-          <Text style={styles.quoteAuthor}>— {quote.author}</Text>
-        </View>
+        {/* Daily Inspiration Quote Card */}
+        <QuoteCard quotes={quotes} initialIndex={dailyStartIndex} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -445,24 +439,4 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
   },
 
-  // Quote
-  quoteContainer: {
-    marginTop: 32,
-    marginHorizontal: 20,
-    paddingVertical: 24,
-    paddingHorizontal: 20,
-    backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: 6,
-  },
-  quoteText: {
-    ...Typography.bodyMd,
-    color: Colors.onSurfaceVariant,
-    fontStyle: 'italic',
-    lineHeight: 22,
-  },
-  quoteAuthor: {
-    ...Typography.labelSm,
-    color: Colors.textMuted,
-    marginTop: 10,
-  },
 });
