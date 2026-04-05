@@ -5,17 +5,15 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Modal,
   Pressable,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import * as ImagePicker from 'expo-image-picker';
-import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
 import StreakCalendar from '../../components/StreakCalendar';
+import ShotUploadCard from '../../components/ShotUploadCard';
 
 import QuoteCard from '../../components/QuoteCard';
 
@@ -49,7 +47,6 @@ const YOUR_PICTURES = [
 type Picture = typeof YOUR_PICTURES[0];
 
 export default function TodayScreen() {
-  const [uploadedUri, setUploadedUri] = useState<string | null>(null);
   const [expandedPicture, setExpandedPicture] = useState<Picture | null>(null);
 
   const quote = useMemo(
@@ -64,22 +61,6 @@ export default function TodayScreen() {
     );
     return dailyTips[dayOfYear % dailyTips.length];
   }, []);
-
-  const handleUpload = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert('Permission needed', 'Please allow photo access to upload your shot.');
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.8,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setUploadedUri(result.assets[0].uri);
-      Alert.alert('Shot uploaded!', 'Nice work — your streak continues.');
-    }
-  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -119,28 +100,7 @@ export default function TodayScreen() {
         <StreakCalendar streakDays={[]} />
 
         {/* Upload CTA */}
-        <TouchableOpacity
-          style={styles.uploadCard}
-          onPress={handleUpload}
-          activeOpacity={0.85}
-        >
-          <LinearGradient
-            colors={[Colors.primary, Colors.primaryContainer]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.uploadGradient}
-          >
-            <Ionicons name="camera" size={32} color={Colors.onPrimary} style={{ marginBottom: 12 }} />
-            <Text style={styles.uploadTitle}>
-              {uploadedUri ? 'SHOT UPLOADED' : 'UPLOAD YOUR DAILY SHOT'}
-            </Text>
-            <Text style={styles.uploadSubtitle}>
-              {uploadedUri
-                ? 'Great work — your streak continues.'
-                : 'Perfect your craft, one shot at a time.\nCapture and upload before midnight.'}
-            </Text>
-          </LinearGradient>
-        </TouchableOpacity>
+        <ShotUploadCard />
 
         {/* Inspiration Card */}
         <View style={styles.inspirationSection}>
@@ -326,34 +286,6 @@ const styles = StyleSheet.create({
   streakMetaLabel: {
     ...Typography.labelSm,
     color: Colors.textMuted,
-  },
-
-  // Upload CTA
-  uploadCard: {
-    marginHorizontal: 20,
-    marginTop: 24,
-    borderRadius: 6,
-    overflow: 'hidden',
-  },
-  uploadGradient: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 40,
-    paddingHorizontal: 24,
-  },
-  uploadTitle: {
-    ...Typography.labelLg,
-    color: Colors.onPrimary,
-    fontSize: 16,
-    letterSpacing: 2.5,
-    textAlign: 'center',
-  },
-  uploadSubtitle: {
-    ...Typography.bodySm,
-    color: 'rgba(255,255,255,0.8)',
-    textAlign: 'center',
-    marginTop: 8,
-    lineHeight: 18,
   },
 
   // Inspiration
