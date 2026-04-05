@@ -33,11 +33,9 @@ Do not optimize for cleverness, abstraction, or unnecessary refactors.
 Before coding, read in this order:
 
 1. `/CLAUDE.md`
-2. `/docs/architecture.md`
-3. `/docs/implementation-rules.md`
-4. `/design/design.md`
-5. relevant `/docs/features/*.md` if they exist
-6. only then inspect the minimum necessary implementation files
+2. `/design_references/DESIGN.md`
+3. The png files in `/design_references/`
+4. Only then inspect the minimum necessary implementation files
 
 Do **not** scan the whole repo unless required for:
 - the task
@@ -159,7 +157,7 @@ Prefer a clean local change over architectural expansion.
 ---
 
 ## UI Implementation Rules
-When editing SwiftUI or visual UI code, **defer to `/design/design.md` and relevant assets in `/design/`**.
+When editing SwiftUI or visual UI code, **defer to `/design_references/design.md` and relevant assets in `/design_references/`**.
 
 ---
 
