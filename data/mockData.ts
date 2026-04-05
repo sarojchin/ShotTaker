@@ -128,11 +128,74 @@ export const leaderboard: LeaderboardEntry[] = [
 
 // --- Motivational quotes ---
 export const quotes = [
-  { text: 'Your first 10,000 photographs are your worst.', author: 'Henri Cartier-Bresson' },
-  { text: 'The camera is an instrument that teaches people how to see without a camera.', author: 'Dorothea Lange' },
-  { text: 'Photography is the story I fail to put into words.', author: 'Destin Sparks' },
-  { text: 'In photography there is a reality so subtle that it becomes more real than reality.', author: 'Alfred Stieglitz' },
-  { text: 'To me, photography is an art of observation. It\'s about finding something interesting in an ordinary place.', author: 'Elliott Erwitt' },
-  { text: 'The best camera is the one you have with you.', author: 'Chase Jarvis' },
-  { text: 'Light makes photography. Embrace light. Admire it. Love it. But above all, know light.', author: 'George Eastman' },
+  {
+    text: 'Your first 10,000 photographs are your worst.',
+    author: 'Henri Cartier-Bresson',
+    authorTitle: 'French Photographer',
+  },
+  {
+    text: 'The camera is an instrument that teaches people how to see without a camera.',
+    author: 'Dorothea Lange',
+    authorTitle: 'American Photographer',
+  },
+  {
+    text: 'Photography is the story I fail to put into words.',
+    author: 'Destin Sparks',
+    authorTitle: 'Photographer',
+  },
+  {
+    text: 'In photography there is a reality so subtle that it becomes more real than reality.',
+    author: 'Alfred Stieglitz',
+    authorTitle: 'American Photographer',
+  },
+  {
+    text: "To me, photography is an art of observation. It's about finding something interesting in an ordinary place.",
+    author: 'Elliott Erwitt',
+    authorTitle: 'American Photographer',
+  },
+  {
+    text: 'The best camera is the one you have with you.',
+    author: 'Chase Jarvis',
+    authorTitle: 'American Photographer',
+  },
+  {
+    text: 'Light makes photography. Embrace light. Admire it. Love it. But above all, know light.',
+    author: 'George Eastman',
+    authorTitle: 'American Inventor & Entrepreneur',
+  },
+  {
+    text: "No place is boring if you've had a good night's sleep and have a pocket full of unexposed film.",
+    author: 'Robert Adams',
+    authorTitle: 'American Photographer',
+  },
+  {
+    text: 'You don\'t take a photograph, you make it.',
+    author: 'Ansel Adams',
+    authorTitle: 'American Photographer',
+  },
+  {
+    text: 'I never have taken a picture I\'ve intended. They\'re always better or worse.',
+    author: 'Diane Arbus',
+    authorTitle: 'American Photographer',
+  },
+  {
+    text: 'Photography is a way of feeling, of touching, of loving. What you have caught on film is captured forever.',
+    author: 'Aaron Siskind',
+    authorTitle: 'American Photographer',
+  },
+  {
+    text: 'A photograph is a secret about a secret. The more it tells you, the less you know.',
+    author: 'Diane Arbus',
+    authorTitle: 'American Photographer',
+  },
+  {
+    text: 'To photograph is to hold one\'s breath, when all faculties converge to capture fleeting reality.',
+    author: 'Henri Cartier-Bresson',
+    authorTitle: 'French Photographer',
+  },
+  {
+    text: 'I wish more people felt that photography was an adventure the same as life itself.',
+    author: 'William Albert Allard',
+    authorTitle: 'American Photographer',
+  },
 ];
