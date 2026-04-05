@@ -27,15 +27,6 @@ import inspirations from '../../data/inspirations';
 import dailyTips from '../../data/dailyTips';
 
 
-// Placeholder gallery images (mock colors representing photos)
-const GALLERY_STRIP = [
-  { color: '#5a4a3a', label: 'Roads' },
-  { color: '#3a4a5a', label: 'Rails' },
-  { color: '#6a5a4a', label: 'Fences' },
-  { color: '#4a5a3a', label: 'Paths' },
-  { color: '#5a3a4a', label: 'Bridges' },
-];
-
 const YOUR_PICTURES = [
   { id: 1, color: '#4a3a2a', label: 'Morning Light', date: 'Apr 5', hasPhoto: true },
   { id: 2, color: '#2a3a4a', label: 'Street Scene', date: 'Apr 4', hasPhoto: true },
@@ -205,44 +196,9 @@ export default function TodayScreen() {
           </Pressable>
         </Modal>
 
-        {/* Gallery Strip — horizontal thumbnail row */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.galleryStripRow}
-          style={styles.galleryStripScroll}
-        >
-          {GALLERY_STRIP.map((item, i) => (
-            <View key={i} style={styles.galleryStripItem}>
-              <View style={[styles.galleryStripImage, { backgroundColor: item.color }]} />
-            </View>
-          ))}
-        </ScrollView>
-
         {/* Daily Tip Card */}
         <View style={styles.dailyTipSection}>
           <DailyTipCard tip={todayTip} />
-        </View>
-
-        {/* Recent Insights */}
-        <View style={styles.insightsSection}>
-          <Text style={styles.sectionLabel}>Recent Insights</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.insightsRow}
-          >
-            {[
-              { color: '#4a4a4a', label: 'Shadows' },
-              { color: '#6a7a5a', label: 'Nature' },
-              { color: '#8a7a6a', label: 'Urban' },
-            ].map((item, i) => (
-              <View key={i} style={styles.insightCard}>
-                <View style={[styles.insightImage, { backgroundColor: item.color }]} />
-                <Text style={styles.insightLabel}>{item.label}</Text>
-              </View>
-            ))}
-          </ScrollView>
         </View>
 
         {/* Quote Card */}
@@ -449,57 +405,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Gallery Strip
-  galleryStripScroll: {
-    marginTop: 24,
-  },
-  galleryStripRow: {
-    paddingHorizontal: 20,
-    gap: 8,
-  },
-  galleryStripItem: {
-    width: 72,
-    height: 54,
-  },
-  galleryStripImage: {
-    width: 72,
-    height: 54,
-    borderRadius: 2,
-  },
-
   // Daily Tip Section
   dailyTipSection: {
     paddingHorizontal: 20,
     marginTop: 28,
   },
 
-  sectionLabel: {
-    ...Typography.headlineSm,
-    color: Colors.onBackground,
-    marginBottom: 16,
-  },
-
-  // Recent Insights
-  insightsSection: {
-    paddingHorizontal: 20,
-    marginTop: 32,
-  },
-  insightsRow: {
-    gap: 12,
-    marginTop: 0,
-  },
-  insightCard: {
-    width: 120,
-  },
-  insightImage: {
-    width: 120,
-    height: 90,
-    borderRadius: 2,
-    marginBottom: 8,
-  },
-  insightLabel: {
-    ...Typography.labelSm,
-    color: Colors.onSurfaceVariant,
-  },
-
 });
+
