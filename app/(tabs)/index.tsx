@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Modal,
-  Pressable,
   Image,
   Dimensions,
 } from 'react-native';
@@ -219,62 +218,70 @@ export default function TodayScreen() {
           animationType="fade"
           onRequestClose={() => setExpandedSlot(null)}
         >
-          <Pressable style={styles.modalOverlay} onPress={() => setExpandedSlot(null)}>
-            <TouchableWithoutFeedback onPress={() => {}}>
-              <View style={styles.modalContent}>
-                {expandedSlot && expandedSlot.photos.length === 1 ? (
-                  <Image
-                    source={{ uri: expandedSlot.photos[0].localPath }}
-                    style={styles.modalImage}
-                    resizeMode="cover"
-                  />
-                ) : expandedSlot && expandedSlot.photos.length > 1 ? (
-                  <ScrollView
-                    key={expandedSlot.dateKey}
-                    horizontal
-                    pagingEnabled
-                    showsHorizontalScrollIndicator={false}
-                    onMomentumScrollEnd={(e) => {
-                      const page = Math.round(
-                        e.nativeEvent.contentOffset.x / e.nativeEvent.layoutMeasurement.width
-                      );
-                      setModalPage(page);
-                    }}
-                  >
-                    {expandedSlot.photos.map((photo) => (
-                      <Image
-                        key={photo.localPath}
-                        source={{ uri: photo.localPath }}
-                        style={[styles.modalImage, { width: MODAL_CONTENT_WIDTH }]}
-                        resizeMode="cover"
-                      />
-                    ))}
-                  </ScrollView>
-                ) : null}
-
-                {expandedSlot && expandedSlot.photos.length > 1 && (
-                  <View style={styles.pageDots}>
-                    {expandedSlot.photos.map((_, i) => (
-                      <View
-                        key={i}
-                        style={[styles.pageDot, i === modalPage && styles.pageDotActive]}
-                      />
-                    ))}
-                  </View>
-                )}
-
-                <View style={styles.modalMeta}>
-                  <Text style={styles.modalLabel}>
-                    {expandedSlot?.photos[modalPage]?.label ?? 'Daily Shot'}
-                  </Text>
-                  <Text style={styles.modalDate}>{expandedSlot?.dateLabel}</Text>
-                </View>
-                <TouchableOpacity style={styles.modalClose} onPress={() => setExpandedSlot(null)}>
-                  <Ionicons name="close" size={20} color={Colors.onBackground} />
-                </TouchableOpacity>
-              </View>
+          <View style={styles.modalOverlay}>
+            {/* Background: absoluteFill, rendered behind content. Tap to dismiss. */}
+            <TouchableWithoutFeedback onPress={() => setExpandedSlot(null)}>
+              <View style={StyleSheet.absoluteFillObject} />
             </TouchableWithoutFeedback>
-          </Pressable>
+
+            {/* Content: loose responder holder (no onResponderMove). ScrollView can
+                steal the responder via onMoveShouldSetResponder for horizontal paging. */}
+            <View
+              style={styles.modalContent}
+              onStartShouldSetResponder={() => true}
+            >
+              {expandedSlot && expandedSlot.photos.length === 1 ? (
+                <Image
+                  source={{ uri: expandedSlot.photos[0].localPath }}
+                  style={styles.modalImage}
+                  resizeMode="cover"
+                />
+              ) : expandedSlot && expandedSlot.photos.length > 1 ? (
+                <ScrollView
+                  key={expandedSlot.dateKey}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  onMomentumScrollEnd={(e) => {
+                    const page = Math.round(
+                      e.nativeEvent.contentOffset.x / e.nativeEvent.layoutMeasurement.width
+                    );
+                    setModalPage(page);
+                  }}
+                >
+                  {expandedSlot.photos.map((photo) => (
+                    <Image
+                      key={photo.localPath}
+                      source={{ uri: photo.localPath }}
+                      style={[styles.modalImage, { width: MODAL_CONTENT_WIDTH }]}
+                      resizeMode="cover"
+                    />
+                  ))}
+                </ScrollView>
+              ) : null}
+
+              {expandedSlot && expandedSlot.photos.length > 1 && (
+                <View style={styles.pageDots}>
+                  {expandedSlot.photos.map((_, i) => (
+                    <View
+                      key={i}
+                      style={[styles.pageDot, i === modalPage && styles.pageDotActive]}
+                    />
+                  ))}
+                </View>
+              )}
+
+              <View style={styles.modalMeta}>
+                <Text style={styles.modalLabel}>
+                  {expandedSlot?.photos[modalPage]?.label ?? 'Daily Shot'}
+                </Text>
+                <Text style={styles.modalDate}>{expandedSlot?.dateLabel}</Text>
+              </View>
+              <TouchableOpacity style={styles.modalClose} onPress={() => setExpandedSlot(null)}>
+                <Ionicons name="close" size={20} color={Colors.onBackground} />
+              </TouchableOpacity>
+            </View>
+          </View>
         </Modal>
 
         {/* Gallery Strip — horizontal thumbnail row */}
