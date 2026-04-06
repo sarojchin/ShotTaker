@@ -225,12 +225,7 @@ export default function TodayScreen() {
               <View style={StyleSheet.absoluteFillObject} />
             </TouchableWithoutFeedback>
 
-            {/* Content: loose responder holder (no onResponderMove). ScrollView can
-                steal the responder via onMoveShouldSetResponder for horizontal paging. */}
-            <View
-              style={styles.modalContent}
-              onStartShouldSetResponder={() => true}
-            >
+            <View style={styles.modalContent}>
               {expandedSlot && expandedSlot.photos.length === 1 ? (
                 <Image
                   source={{ uri: expandedSlot.photos[0].localPath }}
