@@ -27,6 +27,7 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
   const cardRotate = useRef(new Animated.Value(0)).current;
   const checkmarkScale = useRef(new Animated.Value(0)).current;
   const mockupScale = useRef(new Animated.Value(1)).current;
+  const headlineScale = useRef(new Animated.Value(1)).current;
   const titleTranslateY = useRef(new Animated.Value(12)).current;
   const titleOpacity = useRef(new Animated.Value(0)).current;
   const goalOpacity = useRef(new Animated.Value(0)).current;
@@ -161,10 +162,10 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
   };
 
   const animateImageUpdate = (uri: string) => {
-    // Phase 1: pop up
+    // Phase 1: pop up (15% slower than original 120ms → 138ms)
     Animated.timing(mockupScale, {
       toValue: 1.10,
-      duration: 120,
+      duration: 138,
       easing: Easing.out(Easing.quad),
       useNativeDriver: true,
     }).start(() => {
@@ -177,6 +178,23 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
         tension: 200,
         useNativeDriver: true,
       }).start();
+
+      // 200ms after the picture peaks, headline does the same pop
+      Animated.sequence([
+        Animated.delay(200),
+        Animated.timing(headlineScale, {
+          toValue: 1.10,
+          duration: 138,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.spring(headlineScale, {
+          toValue: 1,
+          friction: 4,
+          tension: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
     });
 
     // Concurrent: fade out daily goal row
@@ -278,7 +296,7 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
                 styles.uploadedHeadline,
                 {
                   opacity: titleOpacity,
-                  transform: [{ translateY: titleTranslateY }],
+                  transform: [{ translateY: titleTranslateY }, { scale: headlineScale }],
                 },
               ]}
             >
