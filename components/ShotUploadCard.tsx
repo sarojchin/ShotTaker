@@ -26,6 +26,7 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
 
   const cardRotate = useRef(new Animated.Value(0)).current;
   const checkmarkScale = useRef(new Animated.Value(0)).current;
+  const mockupScale = useRef(new Animated.Value(1)).current;
   const titleTranslateY = useRef(new Animated.Value(12)).current;
   const titleOpacity = useRef(new Animated.Value(0)).current;
   const goalOpacity = useRef(new Animated.Value(0)).current;
@@ -125,6 +126,7 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
       setIsFlipped(false);
       setUploadedUri(null);
       checkmarkScale.setValue(0);
+      mockupScale.setValue(1);
       titleTranslateY.setValue(12);
       titleOpacity.setValue(0);
       goalOpacity.setValue(0);
@@ -158,8 +160,49 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
     }
   };
 
-  const handleUploadAnother = () => {
-    flipToFront(() => pickImage());
+  const animateImageUpdate = (uri: string) => {
+    // Phase 1: pop up
+    Animated.timing(mockupScale, {
+      toValue: 1.10,
+      duration: 120,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    }).start(() => {
+      // Swap image at the scale peak
+      setUploadedUri(uri);
+      // Phase 2: spring back down
+      Animated.spring(mockupScale, {
+        toValue: 1,
+        friction: 4,
+        tension: 200,
+        useNativeDriver: true,
+      }).start();
+    });
+
+    // Concurrent: fade out daily goal row
+    Animated.timing(goalOpacity, {
+      toValue: 0,
+      duration: 220,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleUploadAnother = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permission needed', 'Please allow photo access to upload your shot.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets[0]) {
+      const uri = result.assets[0].uri;
+      animateImageUpdate(uri);
+      onUploadComplete?.(uri);
+    }
   };
 
   return (
@@ -199,7 +242,7 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
           /* ── BACK: Shot Uploaded ── */
           <View style={styles.uploadedCard}>
             {/* Phone mockup with uploaded image */}
-            <View style={styles.phoneMockupWrapper}>
+            <Animated.View style={[styles.phoneMockupWrapper, { transform: [{ scale: mockupScale }] }]}>
               <View style={styles.phoneMockup}>
                 <View style={styles.phoneSpeaker} />
                 {uploadedUri ? (
@@ -221,7 +264,7 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
               >
                 <Ionicons name="checkmark" size={20} color={Colors.white} />
               </Animated.View>
-            </View>
+            </Animated.View>
 
             {/* Daily goal reached row */}
             <Animated.View style={[styles.goalRow, { opacity: goalOpacity }]}>
