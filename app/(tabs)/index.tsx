@@ -39,7 +39,7 @@ const GALLERY_STRIP = [
 interface DaySlot {
   dateKey: string;
   dateLabel: string;
-  photo: LocalPhoto | null;
+  photos: LocalPhoto[];
 }
 
 function localDateKey(d: Date): string {
@@ -50,7 +50,13 @@ function localDateKey(d: Date): string {
 }
 
 function buildDaySlots(photos: LocalPhoto[]): DaySlot[] {
-  const photoMap = new Map(photos.map((p) => [p.dateKey, p]));
+  const photoMap = new Map<string, LocalPhoto[]>();
+  photos.forEach((p) => {
+    const arr = photoMap.get(p.dateKey) ?? [];
+    arr.push(p);
+    photoMap.set(p.dateKey, arr);
+  });
+
   const slots: DaySlot[] = [];
   const today = new Date();
 
@@ -62,7 +68,7 @@ function buildDaySlots(photos: LocalPhoto[]): DaySlot[] {
     slots.push({
       dateKey,
       dateLabel,
-      photo: photoMap.get(dateKey) ?? null,
+      photos: photoMap.get(dateKey) ?? [],
     });
   }
   return slots;
@@ -71,6 +77,8 @@ function buildDaySlots(photos: LocalPhoto[]): DaySlot[] {
 export default function TodayScreen() {
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [expandedSlot, setExpandedSlot] = useState<DaySlot | null>(null);
+  const [modalPage, setModalPage] = useState(0);
+  const [modalWidth, setModalWidth] = useState(0);
 
   const loadPhotos = useCallback(() => {
     setPhotos(getPhotos());
@@ -136,10 +144,9 @@ export default function TodayScreen() {
         <ShotUploadCard
           onUploadComplete={(uri) => {
             const photo = savePhoto(uri, localDateKey(new Date()));
-            setPhotos((prev) => {
-              const without = prev.filter((p) => p.dateKey !== photo.dateKey);
-              return [...without, photo].sort((a, b) => b.dateKey.localeCompare(a.dateKey));
-            });
+            setPhotos((prev) =>
+              [...prev, photo].sort((a, b) => b.dateKey.localeCompare(a.dateKey))
+            );
           }}
         />
 
@@ -163,20 +170,38 @@ export default function TodayScreen() {
             <TouchableOpacity
               key={slot.dateKey}
               style={styles.yourPictureItem}
-              onPress={() => slot.photo && setExpandedSlot(slot)}
-              activeOpacity={slot.photo ? 0.8 : 1}
+              onPress={() => {
+                if (slot.photos.length > 0) {
+                  setModalPage(0);
+                  setExpandedSlot(slot);
+                }
+              }}
+              activeOpacity={slot.photos.length > 0 ? 0.8 : 1}
             >
-              {slot.photo ? (
-                <Image
-                  source={{ uri: slot.photo.localPath }}
-                  style={styles.yourPictureThumbnail}
-                />
+              {slot.photos.length > 0 ? (
+                <View style={styles.stackContainer}>
+                  {slot.photos.length >= 3 && (
+                    <View style={[styles.yourPictureThumbnail, styles.stackLayerBack2]} />
+                  )}
+                  {slot.photos.length >= 2 && (
+                    <View style={[styles.yourPictureThumbnail, styles.stackLayerBack1]} />
+                  )}
+                  <Image
+                    source={{ uri: slot.photos[0].localPath }}
+                    style={styles.yourPictureThumbnail}
+                  />
+                  {slot.photos.length > 1 && (
+                    <View style={styles.stackBadge}>
+                      <Text style={styles.stackBadgeText}>{slot.photos.length}</Text>
+                    </View>
+                  )}
+                </View>
               ) : (
                 <View style={[styles.yourPictureThumbnail, styles.yourPictureMissed]}>
                   <Ionicons name="camera-outline" size={18} color={Colors.outlineVariant} />
                 </View>
               )}
-              <Text style={[styles.yourPictureDate, !slot.photo && styles.yourPictureDateMuted]}>
+              <Text style={[styles.yourPictureDate, slot.photos.length === 0 && styles.yourPictureDateMuted]}>
                 {slot.dateLabel}
               </Text>
             </TouchableOpacity>
@@ -191,18 +216,55 @@ export default function TodayScreen() {
           onRequestClose={() => setExpandedSlot(null)}
         >
           <Pressable style={styles.modalOverlay} onPress={() => setExpandedSlot(null)}>
-            <Pressable style={styles.modalContent} onPress={() => {}}>
-              {expandedSlot?.photo ? (
+            <Pressable
+              style={styles.modalContent}
+              onPress={() => {}}
+              onLayout={(e) => setModalWidth(e.nativeEvent.layout.width)}
+            >
+              {expandedSlot && expandedSlot.photos.length === 1 ? (
                 <Image
-                  source={{ uri: expandedSlot.photo.localPath }}
+                  source={{ uri: expandedSlot.photos[0].localPath }}
                   style={styles.modalImage}
                   resizeMode="cover"
                 />
-              ) : (
-                <View style={styles.modalImage} />
+              ) : expandedSlot && expandedSlot.photos.length > 1 ? (
+                <ScrollView
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  onMomentumScrollEnd={(e) => {
+                    const page = Math.round(
+                      e.nativeEvent.contentOffset.x / e.nativeEvent.layoutMeasurement.width
+                    );
+                    setModalPage(page);
+                  }}
+                >
+                  {expandedSlot.photos.map((photo) => (
+                    <Image
+                      key={photo.localPath}
+                      source={{ uri: photo.localPath }}
+                      style={[styles.modalImage, { width: modalWidth }]}
+                      resizeMode="cover"
+                    />
+                  ))}
+                </ScrollView>
+              ) : null}
+
+              {expandedSlot && expandedSlot.photos.length > 1 && (
+                <View style={styles.pageDots}>
+                  {expandedSlot.photos.map((_, i) => (
+                    <View
+                      key={i}
+                      style={[styles.pageDot, i === modalPage && styles.pageDotActive]}
+                    />
+                  ))}
+                </View>
               )}
+
               <View style={styles.modalMeta}>
-                <Text style={styles.modalLabel}>{expandedSlot?.photo?.label ?? 'Daily Shot'}</Text>
+                <Text style={styles.modalLabel}>
+                  {expandedSlot?.photos[modalPage]?.label ?? 'Daily Shot'}
+                </Text>
                 <Text style={styles.modalDate}>{expandedSlot?.dateLabel}</Text>
               </View>
               <TouchableOpacity style={styles.modalClose} onPress={() => setExpandedSlot(null)}>
@@ -376,6 +438,42 @@ const styles = StyleSheet.create({
   yourPictureMissed: {
     backgroundColor: Colors.surfaceContainerHigh,
   },
+  stackContainer: {
+    width: 72,
+    height: 72,
+    position: 'relative',
+  },
+  stackLayerBack2: {
+    position: 'absolute',
+    top: -4,
+    left: 4,
+    transform: [{ rotate: '3deg' }],
+    backgroundColor: Colors.surfaceContainerHigh,
+  },
+  stackLayerBack1: {
+    position: 'absolute',
+    top: -2,
+    left: 2,
+    transform: [{ rotate: '1.5deg' }],
+    backgroundColor: Colors.surfaceContainerHigh,
+  },
+  stackBadge: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stackBadgeText: {
+    ...Typography.labelSm,
+    color: Colors.onPrimary,
+    fontSize: 10,
+    fontWeight: '700',
+  },
   yourPictureDate: {
     ...Typography.labelSm,
     color: Colors.textMuted,
@@ -383,6 +481,25 @@ const styles = StyleSheet.create({
   },
   yourPictureDateMuted: {
     color: Colors.outlineVariant,
+  },
+
+  // Page dots
+  pageDots: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 10,
+  },
+  pageDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.outlineVariant,
+  },
+  pageDotActive: {
+    backgroundColor: Colors.primary,
+    width: 16,
   },
 
   // Expanded Picture Modal

@@ -27,13 +27,9 @@ function writeMeta(photos: LocalPhoto[]): void {
 export function savePhoto(uri: string, dateKey: string, label?: string): LocalPhoto {
   ensureShotsDir();
 
-  const dest = new File(shotsDir, `${dateKey}.jpg`);
+  const filename = `${dateKey}-${Date.now()}.jpg`;
+  const dest = new File(shotsDir, filename);
   const source = new File(uri);
-
-  // Delete existing file first to ensure clean overwrite
-  if (dest.exists) {
-    dest.delete();
-  }
   source.copy(dest);
 
   const photo: LocalPhoto = {
@@ -43,12 +39,7 @@ export function savePhoto(uri: string, dateKey: string, label?: string): LocalPh
   };
 
   const photos = readMeta();
-  const idx = photos.findIndex((p) => p.dateKey === dateKey);
-  if (idx >= 0) {
-    photos[idx] = photo;
-  } else {
-    photos.push(photo);
-  }
+  photos.push(photo);
   writeMeta(photos);
 
   return photo;
