@@ -9,6 +9,7 @@ import {
   Modal,
   Image,
   Dimensions,
+  FlatList,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -237,27 +238,32 @@ export default function TodayScreen() {
                   resizeMode="cover"
                 />
               ) : expandedSlot && expandedSlot.photos.length > 1 ? (
-                <ScrollView
+                <FlatList
                   key={expandedSlot.dateKey}
+                  data={expandedSlot.photos}
+                  keyExtractor={(item) => item.localPath}
                   horizontal
                   pagingEnabled
                   showsHorizontalScrollIndicator={false}
+                  getItemLayout={(_, index) => ({
+                    length: MODAL_CONTENT_WIDTH,
+                    offset: MODAL_CONTENT_WIDTH * index,
+                    index,
+                  })}
                   onMomentumScrollEnd={(e) => {
                     const page = Math.round(
-                      e.nativeEvent.contentOffset.x / e.nativeEvent.layoutMeasurement.width
+                      e.nativeEvent.contentOffset.x / MODAL_CONTENT_WIDTH
                     );
                     setModalPage(page);
                   }}
-                >
-                  {expandedSlot.photos.map((photo) => (
+                  renderItem={({ item }) => (
                     <Image
-                      key={photo.localPath}
-                      source={{ uri: photo.localPath }}
+                      source={{ uri: item.localPath }}
                       style={[styles.modalImage, { width: MODAL_CONTENT_WIDTH }]}
                       resizeMode="cover"
                     />
-                  ))}
-                </ScrollView>
+                  )}
+                />
               ) : null}
 
               {expandedSlot && expandedSlot.photos.length > 1 && (
