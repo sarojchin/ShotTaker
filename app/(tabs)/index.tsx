@@ -5,9 +5,11 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   Modal,
   Pressable,
   Image,
+  Dimensions,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,6 +28,9 @@ import { getPhotos, savePhoto } from '../../services/photoStorage';
 import { currentUserStreak, quotes } from '../../data/mockData';
 import inspirations from '../../data/inspirations';
 import dailyTips from '../../data/dailyTips';
+
+// modalOverlay has padding: 24 on each side → content fills the remaining width
+const MODAL_CONTENT_WIDTH = Dimensions.get('window').width - 48;
 
 // Placeholder gallery images (mock colors representing photos)
 const GALLERY_STRIP = [
@@ -78,7 +83,6 @@ export default function TodayScreen() {
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [expandedSlot, setExpandedSlot] = useState<DaySlot | null>(null);
   const [modalPage, setModalPage] = useState(0);
-  const [modalWidth, setModalWidth] = useState(0);
 
   const loadPhotos = useCallback(() => {
     setPhotos(getPhotos());
@@ -216,61 +220,60 @@ export default function TodayScreen() {
           onRequestClose={() => setExpandedSlot(null)}
         >
           <Pressable style={styles.modalOverlay} onPress={() => setExpandedSlot(null)}>
-            <Pressable
-              style={styles.modalContent}
-              onPress={() => {}}
-              onLayout={(e) => setModalWidth(e.nativeEvent.layout.width)}
-            >
-              {expandedSlot && expandedSlot.photos.length === 1 ? (
-                <Image
-                  source={{ uri: expandedSlot.photos[0].localPath }}
-                  style={styles.modalImage}
-                  resizeMode="cover"
-                />
-              ) : expandedSlot && expandedSlot.photos.length > 1 ? (
-                <ScrollView
-                  horizontal
-                  pagingEnabled
-                  showsHorizontalScrollIndicator={false}
-                  onMomentumScrollEnd={(e) => {
-                    const page = Math.round(
-                      e.nativeEvent.contentOffset.x / e.nativeEvent.layoutMeasurement.width
-                    );
-                    setModalPage(page);
-                  }}
-                >
-                  {expandedSlot.photos.map((photo) => (
-                    <Image
-                      key={photo.localPath}
-                      source={{ uri: photo.localPath }}
-                      style={[styles.modalImage, { width: modalWidth }]}
-                      resizeMode="cover"
-                    />
-                  ))}
-                </ScrollView>
-              ) : null}
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.modalContent}>
+                {expandedSlot && expandedSlot.photos.length === 1 ? (
+                  <Image
+                    source={{ uri: expandedSlot.photos[0].localPath }}
+                    style={styles.modalImage}
+                    resizeMode="cover"
+                  />
+                ) : expandedSlot && expandedSlot.photos.length > 1 ? (
+                  <ScrollView
+                    key={expandedSlot.dateKey}
+                    horizontal
+                    pagingEnabled
+                    showsHorizontalScrollIndicator={false}
+                    onMomentumScrollEnd={(e) => {
+                      const page = Math.round(
+                        e.nativeEvent.contentOffset.x / e.nativeEvent.layoutMeasurement.width
+                      );
+                      setModalPage(page);
+                    }}
+                  >
+                    {expandedSlot.photos.map((photo) => (
+                      <Image
+                        key={photo.localPath}
+                        source={{ uri: photo.localPath }}
+                        style={[styles.modalImage, { width: MODAL_CONTENT_WIDTH }]}
+                        resizeMode="cover"
+                      />
+                    ))}
+                  </ScrollView>
+                ) : null}
 
-              {expandedSlot && expandedSlot.photos.length > 1 && (
-                <View style={styles.pageDots}>
-                  {expandedSlot.photos.map((_, i) => (
-                    <View
-                      key={i}
-                      style={[styles.pageDot, i === modalPage && styles.pageDotActive]}
-                    />
-                  ))}
+                {expandedSlot && expandedSlot.photos.length > 1 && (
+                  <View style={styles.pageDots}>
+                    {expandedSlot.photos.map((_, i) => (
+                      <View
+                        key={i}
+                        style={[styles.pageDot, i === modalPage && styles.pageDotActive]}
+                      />
+                    ))}
+                  </View>
+                )}
+
+                <View style={styles.modalMeta}>
+                  <Text style={styles.modalLabel}>
+                    {expandedSlot?.photos[modalPage]?.label ?? 'Daily Shot'}
+                  </Text>
+                  <Text style={styles.modalDate}>{expandedSlot?.dateLabel}</Text>
                 </View>
-              )}
-
-              <View style={styles.modalMeta}>
-                <Text style={styles.modalLabel}>
-                  {expandedSlot?.photos[modalPage]?.label ?? 'Daily Shot'}
-                </Text>
-                <Text style={styles.modalDate}>{expandedSlot?.dateLabel}</Text>
+                <TouchableOpacity style={styles.modalClose} onPress={() => setExpandedSlot(null)}>
+                  <Ionicons name="close" size={20} color={Colors.onBackground} />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity style={styles.modalClose} onPress={() => setExpandedSlot(null)}>
-                <Ionicons name="close" size={20} color={Colors.onBackground} />
-              </TouchableOpacity>
-            </Pressable>
+            </TouchableWithoutFeedback>
           </Pressable>
         </Modal>
 
