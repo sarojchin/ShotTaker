@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -88,6 +88,7 @@ export default function TodayScreen() {
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [detailPhotos, setDetailPhotos] = useState<LocalPhoto[] | null>(null);
   const [detailPhotoIdx, setDetailPhotoIdx] = useState(0);
+  const lastUploadedPhoto = useRef<LocalPhoto | null>(null);
 
   const detailPhoto = detailPhotos ? detailPhotos[detailPhotoIdx] : null;
   const closeDetail = () => { setDetailPhotos(null); setDetailPhotoIdx(0); };
@@ -156,13 +157,16 @@ export default function TodayScreen() {
         <ShotUploadCard
           onUploadComplete={(uri, title, location, caption, notes) => {
             const photo = savePhoto(uri, localDateKey(new Date()), { title, location, caption, notes });
+            lastUploadedPhoto.current = photo;
             setPhotos((prev) =>
               [...prev, photo].sort((a, b) => b.dateKey.localeCompare(a.dateKey))
             );
           }}
-          onReviewShot={(uri) => {
-            const found = photos.find((p) => p.localPath === uri);
-            if (found) { setDetailPhotos([found]); setDetailPhotoIdx(0); }
+          onReviewShot={() => {
+            if (lastUploadedPhoto.current) {
+              setDetailPhotos([lastUploadedPhoto.current]);
+              setDetailPhotoIdx(0);
+            }
           }}
         />
 
