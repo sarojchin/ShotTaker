@@ -241,36 +241,38 @@ export default function TodayScreen() {
             </View>
 
             {/* Image area */}
-            {detailPhotos && detailPhotos.length === 1 ? (
-              <Image
-                source={{ uri: detailPhotos[0].localPath }}
-                style={styles.detailImage}
-                resizeMode="cover"
-              />
-            ) : detailPhotos && detailPhotos.length > 1 ? (
-              <FlatList
-                data={detailPhotos}
-                keyExtractor={(item) => item.localPath}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                getItemLayout={(_, index) => ({
-                  length: SCREEN_WIDTH,
-                  offset: SCREEN_WIDTH * index,
-                  index,
-                })}
-                onMomentumScrollEnd={(e) => {
-                  setDetailPhotoIdx(Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH));
-                }}
-                renderItem={({ item }) => (
-                  <Image
-                    source={{ uri: item.localPath }}
-                    style={[styles.detailImage, { width: SCREEN_WIDTH }]}
-                    resizeMode="cover"
-                  />
-                )}
-              />
-            ) : null}
+            <View style={styles.detailImageContainer}>
+              {detailPhotos && detailPhotos.length === 1 ? (
+                <Image
+                  source={{ uri: detailPhotos[0].localPath }}
+                  style={styles.detailImage}
+                  resizeMode="cover"
+                />
+              ) : detailPhotos && detailPhotos.length > 1 ? (
+                <FlatList
+                  data={detailPhotos}
+                  keyExtractor={(item) => item.localPath}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  getItemLayout={(_, index) => ({
+                    length: SCREEN_WIDTH - 32,
+                    offset: (SCREEN_WIDTH - 32) * index,
+                    index,
+                  })}
+                  onMomentumScrollEnd={(e) => {
+                    setDetailPhotoIdx(Math.round(e.nativeEvent.contentOffset.x / (SCREEN_WIDTH - 32)));
+                  }}
+                  renderItem={({ item }) => (
+                    <Image
+                      source={{ uri: item.localPath }}
+                      style={[styles.detailImage, { width: SCREEN_WIDTH - 32 }]}
+                      resizeMode="cover"
+                    />
+                  )}
+                />
+              ) : null}
+            </View>
 
             {/* Pagination dots */}
             {detailPhotos && detailPhotos.length > 1 && (
@@ -574,6 +576,14 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     letterSpacing: 1.5,
     fontSize: 11,
+  },
+  detailImageContainer: {
+    marginHorizontal: 16,
+    marginTop: 8,
+    borderRadius: 4,
+    overflow: 'hidden',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.outlineVariant,
   },
   detailImage: {
     width: '100%',
