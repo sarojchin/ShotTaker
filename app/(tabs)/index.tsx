@@ -29,6 +29,7 @@ import inspirations from '../../data/inspirations';
 import dailyTips from '../../data/dailyTips';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 // Placeholder gallery images (mock colors representing photos)
 const GALLERY_STRIP = [
@@ -231,100 +232,103 @@ export default function TodayScreen() {
         {/* Photo Detail Modal */}
         <Modal
           visible={detailPhotos !== null}
-          transparent={false}
+          transparent
           animationType="slide"
           onRequestClose={closeDetail}
         >
-          <SafeAreaView style={styles.detailSafe} edges={['top', 'bottom']}>
-            {/* Header */}
-            <View style={styles.detailHeader}>
-              <TouchableOpacity style={styles.detailHeaderBtn} onPress={closeDetail} activeOpacity={0.7}>
-                <Ionicons name="close" size={20} color={Colors.onBackground} />
-              </TouchableOpacity>
-              <Text style={styles.detailHeaderTitle}>PHOTO_DETAIL</Text>
-            </View>
-
-            {/* Image area */}
-            <View style={styles.detailImageContainer}>
-              {detailPhotos && detailPhotos.length === 1 ? (
-                <Image
-                  source={{ uri: detailPhotos[0].localPath }}
-                  style={styles.detailImage}
-                  resizeMode="cover"
-                />
-              ) : detailPhotos && detailPhotos.length > 1 ? (
-                <FlatList
-                  data={detailPhotos}
-                  keyExtractor={(item) => item.localPath}
-                  horizontal
-                  pagingEnabled
-                  showsHorizontalScrollIndicator={false}
-                  getItemLayout={(_, index) => ({
-                    length: SCREEN_WIDTH - 32,
-                    offset: (SCREEN_WIDTH - 32) * index,
-                    index,
-                  })}
-                  onMomentumScrollEnd={(e) => {
-                    setDetailPhotoIdx(Math.round(e.nativeEvent.contentOffset.x / (SCREEN_WIDTH - 32)));
-                  }}
-                  renderItem={({ item }) => (
-                    <Image
-                      source={{ uri: item.localPath }}
-                      style={[styles.detailImage, { width: SCREEN_WIDTH - 32 }]}
-                      resizeMode="cover"
-                    />
-                  )}
-                />
-              ) : null}
-            </View>
-
-            {/* Pagination dots */}
-            {detailPhotos && detailPhotos.length > 1 && (
-              <View style={styles.pageDots}>
-                {detailPhotos.map((_, i) => (
-                  <View key={i} style={[styles.pageDot, i === detailPhotoIdx && styles.pageDotActive]} />
-                ))}
+          <View style={styles.detailOverlay}>
+            <TouchableOpacity style={StyleSheet.absoluteFillObject} onPress={closeDetail} activeOpacity={1} />
+            <SafeAreaView edges={['bottom']} style={styles.detailCard}>
+              {/* Header */}
+              <View style={styles.detailHeader}>
+                <TouchableOpacity style={styles.detailHeaderBtn} onPress={closeDetail} activeOpacity={0.7}>
+                  <Ionicons name="close" size={20} color={Colors.onBackground} />
+                </TouchableOpacity>
+                <Text style={styles.detailHeaderTitle}>PHOTO_DETAIL</Text>
               </View>
-            )}
 
-            {/* Metadata */}
-            <ScrollView
-              style={styles.detailScroll}
-              contentContainerStyle={styles.detailBody}
-              showsVerticalScrollIndicator={false}
-            >
-              {detailPhoto?.dateKey && (
-                <View style={styles.detailRow}>
-                  <Ionicons name="calendar-outline" size={13} color={Colors.textMuted} />
-                  <Text style={styles.detailDateText}>{formatDetailDate(detailPhoto.dateKey)}</Text>
+              {/* Image area */}
+              <View style={styles.detailImageContainer}>
+                {detailPhotos && detailPhotos.length === 1 ? (
+                  <Image
+                    source={{ uri: detailPhotos[0].localPath }}
+                    style={styles.detailImage}
+                    resizeMode="cover"
+                  />
+                ) : detailPhotos && detailPhotos.length > 1 ? (
+                  <FlatList
+                    data={detailPhotos}
+                    keyExtractor={(item) => item.localPath}
+                    horizontal
+                    pagingEnabled
+                    showsHorizontalScrollIndicator={false}
+                    getItemLayout={(_, index) => ({
+                      length: SCREEN_WIDTH - 32,
+                      offset: (SCREEN_WIDTH - 32) * index,
+                      index,
+                    })}
+                    onMomentumScrollEnd={(e) => {
+                      setDetailPhotoIdx(Math.round(e.nativeEvent.contentOffset.x / (SCREEN_WIDTH - 32)));
+                    }}
+                    renderItem={({ item }) => (
+                      <Image
+                        source={{ uri: item.localPath }}
+                        style={[styles.detailImage, { width: SCREEN_WIDTH - 32 }]}
+                        resizeMode="cover"
+                      />
+                    )}
+                  />
+                ) : null}
+              </View>
+
+              {/* Pagination dots */}
+              {detailPhotos && detailPhotos.length > 1 && (
+                <View style={styles.pageDots}>
+                  {detailPhotos.map((_, i) => (
+                    <View key={i} style={[styles.pageDot, i === detailPhotoIdx && styles.pageDotActive]} />
+                  ))}
                 </View>
               )}
-              {detailPhoto?.location ? (
-                <View style={[styles.detailRow, { marginTop: 5 }]}>
-                  <Ionicons name="location-outline" size={13} color={Colors.tertiary} />
-                  <Text style={styles.detailLocationText}>{detailPhoto.location.toUpperCase()}</Text>
-                </View>
-              ) : null}
-              {detailPhoto?.title ? (
-                <Text style={styles.detailTitle}>{detailPhoto.title}</Text>
-              ) : null}
-              {(detailPhoto?.caption || detailPhoto?.notes) ? (
-                <View style={styles.detailDivider} />
-              ) : null}
-              {detailPhoto?.caption ? (
-                <View style={styles.detailSection}>
-                  <Text style={styles.detailMetaLabel}>CAPTION</Text>
-                  <Text style={styles.detailMetaValue}>{detailPhoto.caption}</Text>
-                </View>
-              ) : null}
-              {detailPhoto?.notes ? (
-                <View style={styles.detailSection}>
-                  <Text style={styles.detailMetaLabel}>NOTES</Text>
-                  <Text style={styles.detailMetaValue}>{detailPhoto.notes}</Text>
-                </View>
-              ) : null}
-            </ScrollView>
-          </SafeAreaView>
+
+              {/* Metadata */}
+              <ScrollView
+                style={styles.detailScroll}
+                contentContainerStyle={styles.detailBody}
+                showsVerticalScrollIndicator={false}
+              >
+                {detailPhoto?.dateKey && (
+                  <View style={styles.detailRow}>
+                    <Ionicons name="calendar-outline" size={13} color={Colors.textMuted} />
+                    <Text style={styles.detailDateText}>{formatDetailDate(detailPhoto.dateKey)}</Text>
+                  </View>
+                )}
+                {detailPhoto?.location ? (
+                  <View style={[styles.detailRow, { marginTop: 5 }]}>
+                    <Ionicons name="location-outline" size={13} color={Colors.tertiary} />
+                    <Text style={styles.detailLocationText}>{detailPhoto.location.toUpperCase()}</Text>
+                  </View>
+                ) : null}
+                {detailPhoto?.title ? (
+                  <Text style={styles.detailTitle}>{detailPhoto.title}</Text>
+                ) : null}
+                {(detailPhoto?.caption || detailPhoto?.notes) ? (
+                  <View style={styles.detailDivider} />
+                ) : null}
+                {detailPhoto?.caption ? (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailMetaLabel}>CAPTION</Text>
+                    <Text style={styles.detailMetaValue}>{detailPhoto.caption}</Text>
+                  </View>
+                ) : null}
+                {detailPhoto?.notes ? (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailMetaLabel}>NOTES</Text>
+                    <Text style={styles.detailMetaValue}>{detailPhoto.notes}</Text>
+                  </View>
+                ) : null}
+              </ScrollView>
+            </SafeAreaView>
+          </View>
         </Modal>
 
         {/* Gallery Strip — horizontal thumbnail row */}
@@ -556,9 +560,16 @@ const styles = StyleSheet.create({
   },
 
   // Photo Detail Modal
-  detailSafe: {
+  detailOverlay: {
     flex: 1,
+    backgroundColor: 'rgba(28,27,27,0.85)',
+    justifyContent: 'flex-end',
+  },
+  detailCard: {
     backgroundColor: Colors.surfaceElevated,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    overflow: 'hidden',
   },
   detailHeader: {
     flexDirection: 'row',
@@ -594,12 +605,12 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
   },
   detailScroll: {
-    flex: 1,
+    maxHeight: Math.round(SCREEN_HEIGHT * 0.3),
   },
   detailBody: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 40,
+    paddingBottom: 24,
   },
   detailRow: {
     flexDirection: 'row',
