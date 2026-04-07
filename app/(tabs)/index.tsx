@@ -238,7 +238,6 @@ export default function TodayScreen() {
                 <Ionicons name="close" size={20} color={Colors.onBackground} />
               </TouchableOpacity>
               <Text style={styles.detailHeaderTitle}>PHOTO_DETAIL</Text>
-              <Text style={styles.detailHeaderBrand}>LUMEN</Text>
             </View>
 
             {/* Image area */}
@@ -574,14 +573,6 @@ const styles = StyleSheet.create({
     ...Typography.labelSm,
     color: Colors.primary,
     letterSpacing: 1.5,
-    fontSize: 11,
-  },
-  detailHeaderBrand: {
-    width: 44,
-    textAlign: 'right',
-    ...Typography.labelSm,
-    color: Colors.onBackground,
-    letterSpacing: 1,
     fontSize: 11,
   },
   detailImage: {
