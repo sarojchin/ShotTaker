@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   Modal,
   Image,
   Dimensions,
@@ -29,8 +28,7 @@ import { currentUserStreak, quotes } from '../../data/mockData';
 import inspirations from '../../data/inspirations';
 import dailyTips from '../../data/dailyTips';
 
-// modalOverlay has padding: 24 on each side → content fills the remaining width
-const MODAL_CONTENT_WIDTH = Dimensions.get('window').width - 48;
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 // Placeholder gallery images (mock colors representing photos)
 const GALLERY_STRIP = [
@@ -40,6 +38,13 @@ const GALLERY_STRIP = [
   { color: '#4a5a3a', label: 'Paths' },
   { color: '#5a3a4a', label: 'Bridges' },
 ];
+
+function formatDetailDate(dateKey: string): string {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+                  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+  return `${months[month - 1]} ${String(day).padStart(2, '0')}, ${year}`;
+}
 
 interface DaySlot {
   dateKey: string;
@@ -81,9 +86,11 @@ function buildDaySlots(photos: LocalPhoto[]): DaySlot[] {
 
 export default function TodayScreen() {
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
-  const [expandedSlot, setExpandedSlot] = useState<DaySlot | null>(null);
-  const [modalPage, setModalPage] = useState(0);
-  const [reviewPhotoUri, setReviewPhotoUri] = useState<string | null>(null);
+  const [detailPhotos, setDetailPhotos] = useState<LocalPhoto[] | null>(null);
+  const [detailPhotoIdx, setDetailPhotoIdx] = useState(0);
+
+  const detailPhoto = detailPhotos ? detailPhotos[detailPhotoIdx] : null;
+  const closeDetail = () => { setDetailPhotos(null); setDetailPhotoIdx(0); };
 
   const loadPhotos = useCallback(() => {
     setPhotos(getPhotos());
@@ -153,7 +160,10 @@ export default function TodayScreen() {
               [...prev, photo].sort((a, b) => b.dateKey.localeCompare(a.dateKey))
             );
           }}
-          onReviewShot={(uri) => setReviewPhotoUri(uri)}
+          onReviewShot={(uri) => {
+            const found = photos.find((p) => p.localPath === uri);
+            if (found) { setDetailPhotos([found]); setDetailPhotoIdx(0); }
+          }}
         />
 
         {/* Inspiration Card */}
@@ -178,8 +188,8 @@ export default function TodayScreen() {
               style={styles.yourPictureItem}
               onPress={() => {
                 if (slot.photos.length > 0) {
-                  setModalPage(0);
-                  setExpandedSlot(slot);
+                  setDetailPhotos(slot.photos);
+                  setDetailPhotoIdx(0);
                 }
               }}
               activeOpacity={slot.photos.length > 0 ? 0.8 : 1}
@@ -214,106 +224,102 @@ export default function TodayScreen() {
           ))}
         </ScrollView>
 
-        {/* Expanded Picture Modal */}
+        {/* Photo Detail Modal */}
         <Modal
-          visible={expandedSlot !== null}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setExpandedSlot(null)}
+          visible={detailPhotos !== null}
+          transparent={false}
+          animationType="slide"
+          onRequestClose={closeDetail}
         >
-          <View style={styles.modalOverlay}>
-            {/* Background: absoluteFill, rendered behind content. Tap to dismiss. */}
-            <TouchableWithoutFeedback onPress={() => setExpandedSlot(null)}>
-              <View style={StyleSheet.absoluteFillObject} />
-            </TouchableWithoutFeedback>
+          <SafeAreaView style={styles.detailSafe} edges={['top', 'bottom']}>
+            {/* Header */}
+            <View style={styles.detailHeader}>
+              <TouchableOpacity style={styles.detailHeaderBtn} onPress={closeDetail} activeOpacity={0.7}>
+                <Ionicons name="close" size={20} color={Colors.onBackground} />
+              </TouchableOpacity>
+              <Text style={styles.detailHeaderTitle}>PHOTO_DETAIL</Text>
+              <Text style={styles.detailHeaderBrand}>LUMEN</Text>
+            </View>
 
-            <View style={styles.modalContent}>
-              {expandedSlot && expandedSlot.photos.length === 1 ? (
-                <Image
-                  source={{ uri: expandedSlot.photos[0].localPath }}
-                  style={styles.modalImage}
-                  resizeMode="cover"
-                />
-              ) : expandedSlot && expandedSlot.photos.length > 1 ? (
-                <FlatList
-                  key={expandedSlot.dateKey}
-                  data={expandedSlot.photos}
-                  keyExtractor={(item) => item.localPath}
-                  horizontal
-                  pagingEnabled
-                  showsHorizontalScrollIndicator={false}
-                  getItemLayout={(_, index) => ({
-                    length: MODAL_CONTENT_WIDTH,
-                    offset: MODAL_CONTENT_WIDTH * index,
-                    index,
-                  })}
-                  onMomentumScrollEnd={(e) => {
-                    const page = Math.round(
-                      e.nativeEvent.contentOffset.x / MODAL_CONTENT_WIDTH
-                    );
-                    setModalPage(page);
-                  }}
-                  renderItem={({ item }) => (
-                    <Image
-                      source={{ uri: item.localPath }}
-                      style={[styles.modalImage, { width: MODAL_CONTENT_WIDTH }]}
-                      resizeMode="cover"
-                    />
-                  )}
-                />
-              ) : null}
+            {/* Image area */}
+            {detailPhotos && detailPhotos.length === 1 ? (
+              <Image
+                source={{ uri: detailPhotos[0].localPath }}
+                style={styles.detailImage}
+                resizeMode="cover"
+              />
+            ) : detailPhotos && detailPhotos.length > 1 ? (
+              <FlatList
+                data={detailPhotos}
+                keyExtractor={(item) => item.localPath}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                getItemLayout={(_, index) => ({
+                  length: SCREEN_WIDTH,
+                  offset: SCREEN_WIDTH * index,
+                  index,
+                })}
+                onMomentumScrollEnd={(e) => {
+                  setDetailPhotoIdx(Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH));
+                }}
+                renderItem={({ item }) => (
+                  <Image
+                    source={{ uri: item.localPath }}
+                    style={[styles.detailImage, { width: SCREEN_WIDTH }]}
+                    resizeMode="cover"
+                  />
+                )}
+              />
+            ) : null}
 
-              {expandedSlot && expandedSlot.photos.length > 1 && (
-                <View style={styles.pageDots}>
-                  {expandedSlot.photos.map((_, i) => (
-                    <View
-                      key={i}
-                      style={[styles.pageDot, i === modalPage && styles.pageDotActive]}
-                    />
-                  ))}
+            {/* Pagination dots */}
+            {detailPhotos && detailPhotos.length > 1 && (
+              <View style={styles.pageDots}>
+                {detailPhotos.map((_, i) => (
+                  <View key={i} style={[styles.pageDot, i === detailPhotoIdx && styles.pageDotActive]} />
+                ))}
+              </View>
+            )}
+
+            {/* Metadata */}
+            <ScrollView
+              style={styles.detailScroll}
+              contentContainerStyle={styles.detailBody}
+              showsVerticalScrollIndicator={false}
+            >
+              {detailPhoto?.dateKey && (
+                <View style={styles.detailRow}>
+                  <Ionicons name="calendar-outline" size={13} color={Colors.textMuted} />
+                  <Text style={styles.detailDateText}>{formatDetailDate(detailPhoto.dateKey)}</Text>
                 </View>
               )}
-
-              <View style={styles.modalMeta}>
-                <Text style={styles.modalLabel}>
-                  {expandedSlot?.photos[modalPage]?.title ?? 'Daily Shot'}
-                </Text>
-                <Text style={styles.modalDate}>{expandedSlot?.dateLabel}</Text>
-              </View>
-              <TouchableOpacity style={styles.modalClose} onPress={() => setExpandedSlot(null)}>
-                <Ionicons name="close" size={20} color={Colors.onBackground} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-
-        {/* Review Shot Modal */}
-        <Modal
-          visible={reviewPhotoUri !== null}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setReviewPhotoUri(null)}
-        >
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback onPress={() => setReviewPhotoUri(null)}>
-              <View style={StyleSheet.absoluteFillObject} />
-            </TouchableWithoutFeedback>
-            <View style={styles.modalContent}>
-              {reviewPhotoUri && (
-                <Image
-                  source={{ uri: reviewPhotoUri }}
-                  style={styles.modalImage}
-                  resizeMode="cover"
-                />
-              )}
-              <View style={styles.modalMeta}>
-                <Text style={styles.modalLabel}>Daily Shot</Text>
-              </View>
-              <TouchableOpacity style={styles.modalClose} onPress={() => setReviewPhotoUri(null)}>
-                <Ionicons name="close" size={20} color={Colors.onBackground} />
-              </TouchableOpacity>
-            </View>
-          </View>
+              {detailPhoto?.location ? (
+                <View style={[styles.detailRow, { marginTop: 5 }]}>
+                  <Ionicons name="location-outline" size={13} color={Colors.tertiary} />
+                  <Text style={styles.detailLocationText}>{detailPhoto.location.toUpperCase()}</Text>
+                </View>
+              ) : null}
+              {detailPhoto?.title ? (
+                <Text style={styles.detailTitle}>{detailPhoto.title}</Text>
+              ) : null}
+              {(detailPhoto?.caption || detailPhoto?.notes) ? (
+                <View style={styles.detailDivider} />
+              ) : null}
+              {detailPhoto?.caption ? (
+                <View style={styles.detailSection}>
+                  <Text style={styles.detailMetaLabel}>CAPTION</Text>
+                  <Text style={styles.detailMetaValue}>{detailPhoto.caption}</Text>
+                </View>
+              ) : null}
+              {detailPhoto?.notes ? (
+                <View style={styles.detailSection}>
+                  <Text style={styles.detailMetaLabel}>NOTES</Text>
+                  <Text style={styles.detailMetaValue}>{detailPhoto.notes}</Text>
+                </View>
+              ) : null}
+            </ScrollView>
+          </SafeAreaView>
         </Modal>
 
         {/* Gallery Strip — horizontal thumbnail row */}
@@ -544,47 +550,94 @@ const styles = StyleSheet.create({
     width: 16,
   },
 
-  // Expanded Picture Modal
-  modalOverlay: {
+  // Photo Detail Modal
+  detailSafe: {
     flex: 1,
-    backgroundColor: 'rgba(28,27,27,0.85)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  modalContent: {
-    width: '100%',
     backgroundColor: Colors.surfaceElevated,
-    borderRadius: 6,
-    overflow: 'hidden',
   },
-  modalImage: {
+  detailHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: Colors.surfaceElevated,
+  },
+  detailHeaderBtn: {
+    width: 44,
+    height: 32,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+  detailHeaderTitle: {
+    flex: 1,
+    textAlign: 'center',
+    ...Typography.labelSm,
+    color: Colors.primary,
+    letterSpacing: 1.5,
+    fontSize: 11,
+  },
+  detailHeaderBrand: {
+    width: 44,
+    textAlign: 'right',
+    ...Typography.labelSm,
+    color: Colors.onBackground,
+    letterSpacing: 1,
+    fontSize: 11,
+  },
+  detailImage: {
     width: '100%',
     aspectRatio: 1,
   },
-  modalMeta: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+  detailScroll: {
+    flex: 1,
   },
-  modalLabel: {
-    ...Typography.titleSm,
-    color: Colors.onBackground,
+  detailBody: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
   },
-  modalDate: {
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  detailDateText: {
     ...Typography.labelSm,
     color: Colors.textMuted,
-    marginTop: 4,
+    letterSpacing: 0.5,
+    fontSize: 11,
   },
-  modalClose: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(252,249,248,0.85)',
-    alignItems: 'center',
-    justifyContent: 'center',
+  detailLocationText: {
+    ...Typography.labelSm,
+    color: Colors.tertiary,
+    letterSpacing: 0.5,
+    fontSize: 11,
+  },
+  detailTitle: {
+    ...Typography.headlineLg,
+    color: Colors.onBackground,
+    fontSize: 26,
+    lineHeight: 32,
+    marginTop: 14,
+  },
+  detailDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: Colors.outlineVariant,
+    marginVertical: 20,
+  },
+  detailSection: {
+    marginBottom: 16,
+  },
+  detailMetaLabel: {
+    ...Typography.labelSm,
+    color: Colors.textMuted,
+    letterSpacing: 1,
+    marginBottom: 4,
+    fontSize: 10,
+  },
+  detailMetaValue: {
+    ...Typography.bodyMd,
+    color: Colors.onBackground,
   },
 
   // Gallery Strip
