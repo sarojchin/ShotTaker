@@ -27,7 +27,7 @@ function writeMeta(photos: LocalPhoto[]): void {
 export function savePhoto(
   uri: string,
   dateKey: string,
-  meta?: { title?: string; location?: string; notes?: string },
+  meta?: { title?: string; location?: string; caption?: string; notes?: string },
 ): LocalPhoto {
   ensureShotsDir();
 
@@ -41,6 +41,7 @@ export function savePhoto(
     localPath: dest.uri,
     ...(meta?.title ? { title: meta.title } : {}),
     ...(meta?.location ? { location: meta.location } : {}),
+    ...(meta?.caption ? { caption: meta.caption } : {}),
     ...(meta?.notes ? { notes: meta.notes } : {}),
   };
 

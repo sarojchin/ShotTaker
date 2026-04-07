@@ -41,5 +41,6 @@ export interface LocalPhoto {
   localPath: string; // file:// URI for <Image source={{ uri }}>
   title?: string;
   location?: string;
+  caption?: string;
   notes?: string;
 }

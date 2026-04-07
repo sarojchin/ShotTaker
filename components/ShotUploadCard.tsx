@@ -22,7 +22,7 @@ import Typography from '../constants/Typography';
 type CardFace = 'front' | 'meta' | 'uploaded';
 
 interface Props {
-  onUploadComplete?: (uri: string, title?: string, location?: string, notes?: string) => void;
+  onUploadComplete?: (uri: string, title?: string, location?: string, caption?: string, notes?: string) => void;
   onReviewShot?: (uri: string) => void;
 }
 
@@ -34,6 +34,7 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
   // Metadata form fields
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
+  const [caption, setCaption] = useState('');
   const [notes, setNotes] = useState('');
 
   // Card flip animation
@@ -106,6 +107,7 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
   const flipToMeta = (uri: string) => {
     setTitle('');
     setLocation('');
+    setCaption('');
     setNotes('');
     resetMetaAnimations();
 
@@ -241,7 +243,7 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
 
   const handleUpload = () => {
     if (!pendingUri) return;
-    onUploadComplete?.(pendingUri, title || undefined, location || undefined, notes || undefined);
+    onUploadComplete?.(pendingUri, title || undefined, location || undefined, caption || undefined, notes || undefined);
     flipToUploaded(pendingUri);
   };
 
@@ -357,6 +359,21 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
                       placeholder="optional"
                       placeholderTextColor={Colors.outlineVariant}
                       returnKeyType="next"
+                    />
+                    <View style={styles.fieldUnderline} />
+                  </View>
+
+                  {/* Caption */}
+                  <View style={styles.fieldGroup}>
+                    <Text style={styles.fieldLabel}>CAPTION</Text>
+                    <TextInput
+                      style={styles.fieldInput}
+                      value={caption}
+                      onChangeText={setCaption}
+                      placeholder="optional"
+                      placeholderTextColor={Colors.outlineVariant}
+                      returnKeyType="next"
+                      multiline
                     />
                     <View style={styles.fieldUnderline} />
                   </View>
