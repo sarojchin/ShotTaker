@@ -83,6 +83,7 @@ export default function TodayScreen() {
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [expandedSlot, setExpandedSlot] = useState<DaySlot | null>(null);
   const [modalPage, setModalPage] = useState(0);
+  const [reviewPhotoUri, setReviewPhotoUri] = useState<string | null>(null);
 
   const loadPhotos = useCallback(() => {
     setPhotos(getPhotos());
@@ -152,6 +153,7 @@ export default function TodayScreen() {
               [...prev, photo].sort((a, b) => b.dateKey.localeCompare(a.dateKey))
             );
           }}
+          onReviewShot={(uri) => setReviewPhotoUri(uri)}
         />
 
         {/* Inspiration Card */}
@@ -279,6 +281,35 @@ export default function TodayScreen() {
                 <Text style={styles.modalDate}>{expandedSlot?.dateLabel}</Text>
               </View>
               <TouchableOpacity style={styles.modalClose} onPress={() => setExpandedSlot(null)}>
+                <Ionicons name="close" size={20} color={Colors.onBackground} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Review Shot Modal */}
+        <Modal
+          visible={reviewPhotoUri !== null}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setReviewPhotoUri(null)}
+        >
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback onPress={() => setReviewPhotoUri(null)}>
+              <View style={StyleSheet.absoluteFillObject} />
+            </TouchableWithoutFeedback>
+            <View style={styles.modalContent}>
+              {reviewPhotoUri && (
+                <Image
+                  source={{ uri: reviewPhotoUri }}
+                  style={styles.modalImage}
+                  resizeMode="cover"
+                />
+              )}
+              <View style={styles.modalMeta}>
+                <Text style={styles.modalLabel}>Daily Shot</Text>
+              </View>
+              <TouchableOpacity style={styles.modalClose} onPress={() => setReviewPhotoUri(null)}>
                 <Ionicons name="close" size={20} color={Colors.onBackground} />
               </TouchableOpacity>
             </View>
