@@ -238,7 +238,7 @@ export default function TodayScreen() {
         >
           <View style={styles.detailOverlay}>
             <TouchableOpacity style={StyleSheet.absoluteFillObject} onPress={closeDetail} activeOpacity={1} />
-            <SafeAreaView edges={['bottom']} style={styles.detailCard}>
+            <View style={styles.detailCard}>
               {/* Header */}
               <View style={styles.detailHeader}>
                 <TouchableOpacity style={styles.detailHeaderBtn} onPress={closeDetail} activeOpacity={0.7}>
@@ -327,7 +327,7 @@ export default function TodayScreen() {
                   </View>
                 ) : null}
               </ScrollView>
-            </SafeAreaView>
+            </View>
           </View>
         </Modal>
 
@@ -563,12 +563,12 @@ const styles = StyleSheet.create({
   detailOverlay: {
     flex: 1,
     backgroundColor: 'rgba(28,27,27,0.85)',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
   },
   detailCard: {
     backgroundColor: Colors.surfaceElevated,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+    borderRadius: 12,
     overflow: 'hidden',
   },
   detailHeader: {
