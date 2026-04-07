@@ -39,5 +39,7 @@ export interface LeaderboardEntry {
 export interface LocalPhoto {
   dateKey: string;   // "YYYY-MM-DD"
   localPath: string; // file:// URI for <Image source={{ uri }}>
-  label?: string;
+  title?: string;
+  location?: string;
+  notes?: string;
 }

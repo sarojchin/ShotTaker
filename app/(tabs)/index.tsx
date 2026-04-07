@@ -146,8 +146,8 @@ export default function TodayScreen() {
 
         {/* Upload CTA */}
         <ShotUploadCard
-          onUploadComplete={(uri) => {
-            const photo = savePhoto(uri, localDateKey(new Date()));
+          onUploadComplete={(uri, title, location, notes) => {
+            const photo = savePhoto(uri, localDateKey(new Date()), { title, location, notes });
             setPhotos((prev) =>
               [...prev, photo].sort((a, b) => b.dateKey.localeCompare(a.dateKey))
             );
@@ -274,7 +274,7 @@ export default function TodayScreen() {
 
               <View style={styles.modalMeta}>
                 <Text style={styles.modalLabel}>
-                  {expandedSlot?.photos[modalPage]?.label ?? 'Daily Shot'}
+                  {expandedSlot?.photos[modalPage]?.title ?? 'Daily Shot'}
                 </Text>
                 <Text style={styles.modalDate}>{expandedSlot?.dateLabel}</Text>
               </View>

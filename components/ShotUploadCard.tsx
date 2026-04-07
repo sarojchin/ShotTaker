@@ -8,6 +8,10 @@ import {
   Easing,
   Alert,
   Image,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -15,16 +19,32 @@ import * as ImagePicker from 'expo-image-picker';
 import Colors from '../constants/Colors';
 import Typography from '../constants/Typography';
 
+type CardFace = 'front' | 'meta' | 'uploaded';
+
 interface Props {
-  onUploadComplete?: (uri: string) => void;
+  onUploadComplete?: (uri: string, title?: string, location?: string, notes?: string) => void;
   onReviewShot?: (uri: string) => void;
 }
 
 export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props) {
+  const [cardFace, setCardFace] = useState<CardFace>('front');
+  const [pendingUri, setPendingUri] = useState<string | null>(null);
   const [uploadedUri, setUploadedUri] = useState<string | null>(null);
-  const [isFlipped, setIsFlipped] = useState(false);
 
+  // Metadata form fields
+  const [title, setTitle] = useState('');
+  const [location, setLocation] = useState('');
+  const [notes, setNotes] = useState('');
+
+  // Card flip animation
   const cardRotate = useRef(new Animated.Value(0)).current;
+
+  // Meta face animations
+  const photoPopScale = useRef(new Animated.Value(0.85)).current;
+  const formOpacity = useRef(new Animated.Value(0)).current;
+  const formTranslateY = useRef(new Animated.Value(10)).current;
+
+  // Uploaded face animations
   const checkmarkScale = useRef(new Animated.Value(0)).current;
   const mockupScale = useRef(new Animated.Value(1)).current;
   const headlineScale = useRef(new Animated.Value(1)).current;
@@ -39,20 +59,90 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
     outputRange: ['-90deg', '0deg', '90deg'],
   });
 
-  const flipToBack = (uri: string) => {
-    // Phase 1: tilt front away
+  const resetMetaAnimations = () => {
+    photoPopScale.setValue(0.85);
+    formOpacity.setValue(0);
+    formTranslateY.setValue(10);
+  };
+
+  const resetUploadedAnimations = () => {
+    checkmarkScale.setValue(0);
+    mockupScale.setValue(1);
+    headlineScale.setValue(1);
+    titleTranslateY.setValue(12);
+    titleOpacity.setValue(0);
+    goalOpacity.setValue(0);
+    buttonsOpacity.setValue(0);
+    buttonsTranslateY.setValue(8);
+  };
+
+  const animateMetaEntrance = () => {
+    Animated.parallel([
+      Animated.spring(photoPopScale, {
+        toValue: 1,
+        friction: 5,
+        tension: 160,
+        useNativeDriver: true,
+      }),
+      Animated.sequence([
+        Animated.delay(120),
+        Animated.parallel([
+          Animated.spring(formTranslateY, {
+            toValue: 0,
+            friction: 8,
+            tension: 90,
+            useNativeDriver: true,
+          }),
+          Animated.timing(formOpacity, {
+            toValue: 1,
+            duration: 220,
+            useNativeDriver: true,
+          }),
+        ]),
+      ]),
+    ]).start();
+  };
+
+  const flipToMeta = (uri: string) => {
+    setTitle('');
+    setLocation('');
+    setNotes('');
+    resetMetaAnimations();
+
     Animated.timing(cardRotate, {
       toValue: 90,
       duration: 210,
       easing: Easing.in(Easing.cubic),
       useNativeDriver: true,
     }).start(() => {
-      // Swap face at the invisible midpoint
-      setUploadedUri(uri);
-      setIsFlipped(true);
+      setPendingUri(uri);
+      setCardFace('meta');
       cardRotate.setValue(-90);
 
-      // Phase 2: spring the back face in
+      Animated.spring(cardRotate, {
+        toValue: 0,
+        friction: 7,
+        tension: 75,
+        useNativeDriver: true,
+      }).start(() => {
+        animateMetaEntrance();
+      });
+    });
+  };
+
+  const flipToUploaded = (uri: string) => {
+    resetUploadedAnimations();
+
+    Animated.timing(cardRotate, {
+      toValue: 90,
+      duration: 210,
+      easing: Easing.in(Easing.cubic),
+      useNativeDriver: true,
+    }).start(() => {
+      setUploadedUri(uri);
+      setCardFace('uploaded');
+      cardRotate.setValue(-90);
+
       Animated.parallel([
         Animated.spring(cardRotate, {
           toValue: 0,
@@ -60,7 +150,6 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
           tension: 75,
           useNativeDriver: true,
         }),
-        // Checkmark badge pops with overshoot
         Animated.sequence([
           Animated.delay(180),
           Animated.spring(checkmarkScale, {
@@ -70,7 +159,6 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
             useNativeDriver: true,
           }),
         ]),
-        // "DAILY GOAL REACHED" fades in
         Animated.sequence([
           Animated.delay(220),
           Animated.timing(goalOpacity, {
@@ -79,7 +167,6 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
             useNativeDriver: true,
           }),
         ]),
-        // Headline slides up and fades in
         Animated.sequence([
           Animated.delay(270),
           Animated.parallel([
@@ -96,7 +183,6 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
             }),
           ]),
         ]),
-        // Buttons slide up and fade in
         Animated.sequence([
           Animated.delay(360),
           Animated.parallel([
@@ -124,15 +210,9 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
       easing: Easing.in(Easing.cubic),
       useNativeDriver: true,
     }).start(() => {
-      setIsFlipped(false);
+      setCardFace('front');
+      setPendingUri(null);
       setUploadedUri(null);
-      checkmarkScale.setValue(0);
-      mockupScale.setValue(1);
-      titleTranslateY.setValue(12);
-      titleOpacity.setValue(0);
-      goalOpacity.setValue(0);
-      buttonsOpacity.setValue(0);
-      buttonsTranslateY.setValue(8);
       cardRotate.setValue(-90);
 
       Animated.spring(cardRotate, {
@@ -155,55 +235,14 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
       quality: 0.8,
     });
     if (!result.canceled && result.assets[0]) {
-      const uri = result.assets[0].uri;
-      flipToBack(uri);
-      onUploadComplete?.(uri);
+      flipToMeta(result.assets[0].uri);
     }
   };
 
-  const animateImageUpdate = (uri: string) => {
-    // Phase 1: pop up (15% slower than original 120ms → 138ms)
-    Animated.timing(mockupScale, {
-      toValue: 1.10,
-      duration: 138,
-      easing: Easing.out(Easing.quad),
-      useNativeDriver: true,
-    }).start(() => {
-      // Swap image at the scale peak
-      setUploadedUri(uri);
-      // Phase 2: spring back down
-      Animated.spring(mockupScale, {
-        toValue: 1,
-        friction: 4,
-        tension: 200,
-        useNativeDriver: true,
-      }).start();
-
-      // 200ms after the picture peaks, headline does the same pop
-      Animated.sequence([
-        Animated.delay(200),
-        Animated.timing(headlineScale, {
-          toValue: 1.10,
-          duration: 138,
-          easing: Easing.out(Easing.quad),
-          useNativeDriver: true,
-        }),
-        Animated.spring(headlineScale, {
-          toValue: 1,
-          friction: 4,
-          tension: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    });
-
-    // Concurrent: fade out daily goal row
-    Animated.timing(goalOpacity, {
-      toValue: 0,
-      duration: 220,
-      easing: Easing.out(Easing.ease),
-      useNativeDriver: true,
-    }).start();
+  const handleUpload = () => {
+    if (!pendingUri) return;
+    onUploadComplete?.(pendingUri, title || undefined, location || undefined, notes || undefined);
+    flipToUploaded(pendingUri);
   };
 
   const handleUploadAnother = async () => {
@@ -217,9 +256,7 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
       quality: 0.8,
     });
     if (!result.canceled && result.assets[0]) {
-      const uri = result.assets[0].uri;
-      animateImageUpdate(uri);
-      onUploadComplete?.(uri);
+      flipToMeta(result.assets[0].uri);
     }
   };
 
@@ -231,7 +268,7 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
           { transform: [{ perspective: 1200 }, { rotateY }] },
         ]}
       >
-        {!isFlipped ? (
+        {cardFace === 'front' && (
           /* ── FRONT: Upload CTA ── */
           <TouchableOpacity
             onPress={pickImage}
@@ -256,8 +293,105 @@ export default function ShotUploadCard({ onUploadComplete, onReviewShot }: Props
               </Text>
             </LinearGradient>
           </TouchableOpacity>
-        ) : (
-          /* ── BACK: Shot Uploaded ── */
+        )}
+
+        {cardFace === 'meta' && (
+          /* ── META: Photo preview + metadata form ── */
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          >
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.metaCard}>
+                {/* Photo preview with pop animation */}
+                <Animated.View
+                  style={[
+                    styles.metaPhotoWrapper,
+                    { transform: [{ scale: photoPopScale }] },
+                  ]}
+                >
+                  {pendingUri ? (
+                    <Image
+                      source={{ uri: pendingUri }}
+                      style={styles.metaPhoto}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={[styles.metaPhoto, { backgroundColor: Colors.surfaceContainerHigh }]} />
+                  )}
+                </Animated.View>
+
+                {/* Form fields */}
+                <Animated.View
+                  style={[
+                    styles.metaForm,
+                    {
+                      opacity: formOpacity,
+                      transform: [{ translateY: formTranslateY }],
+                    },
+                  ]}
+                >
+                  {/* Title */}
+                  <View style={styles.fieldGroup}>
+                    <Text style={styles.fieldLabel}>TITLE</Text>
+                    <TextInput
+                      style={styles.fieldInput}
+                      value={title}
+                      onChangeText={setTitle}
+                      placeholder="optional"
+                      placeholderTextColor={Colors.outlineVariant}
+                      returnKeyType="next"
+                    />
+                    <View style={styles.fieldUnderline} />
+                  </View>
+
+                  {/* Location */}
+                  <View style={styles.fieldGroup}>
+                    <Text style={styles.fieldLabel}>LOCATION</Text>
+                    <TextInput
+                      style={styles.fieldInput}
+                      value={location}
+                      onChangeText={setLocation}
+                      placeholder="optional"
+                      placeholderTextColor={Colors.outlineVariant}
+                      returnKeyType="next"
+                    />
+                    <View style={styles.fieldUnderline} />
+                  </View>
+
+                  {/* Notes */}
+                  <View style={styles.fieldGroup}>
+                    <Text style={styles.fieldLabel}>NOTES</Text>
+                    <TextInput
+                      style={styles.fieldInput}
+                      value={notes}
+                      onChangeText={setNotes}
+                      placeholder="optional"
+                      placeholderTextColor={Colors.outlineVariant}
+                      returnKeyType="done"
+                      multiline
+                    />
+                    <View style={styles.fieldUnderline} />
+                  </View>
+
+                  {/* Upload button */}
+                  <TouchableOpacity
+                    style={styles.uploadButton}
+                    activeOpacity={0.85}
+                    onPress={handleUpload}
+                  >
+                    <Text style={styles.uploadButtonText}>UPLOAD SHOT</Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        )}
+
+        {cardFace === 'uploaded' && (
+          /* ── UPLOADED: Confirmation ── */
           <View style={styles.uploadedCard}>
             {/* Phone mockup with uploaded image */}
             <Animated.View style={[styles.phoneMockupWrapper, { transform: [{ scale: mockupScale }] }]}>
@@ -343,7 +477,6 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 6,
     overflow: 'hidden',
-    // Ambient shadow per design system
     shadowColor: Colors.onBackground,
     shadowOpacity: 0.05,
     shadowRadius: 40,
@@ -377,7 +510,59 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 
-  // ── Back face ──
+  // ── Meta face ──
+  metaCard: {
+    backgroundColor: Colors.surfaceElevated,
+    paddingTop: 0,
+    paddingBottom: 28,
+  },
+  metaPhotoWrapper: {
+    width: '100%',
+  },
+  metaPhoto: {
+    width: '100%',
+    aspectRatio: 4 / 3,
+  },
+  metaForm: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+  },
+  fieldGroup: {
+    marginBottom: 20,
+  },
+  fieldLabel: {
+    ...Typography.labelSm,
+    color: Colors.textMuted,
+    letterSpacing: 1.5,
+    fontSize: 11,
+    marginBottom: 6,
+  },
+  fieldInput: {
+    ...Typography.bodyMd,
+    color: Colors.onBackground,
+    paddingVertical: 6,
+    paddingHorizontal: 0,
+    fontSize: 15,
+  },
+  fieldUnderline: {
+    height: 1,
+    backgroundColor: Colors.outlineVariant,
+    marginTop: 2,
+  },
+  uploadButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 6,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  uploadButtonText: {
+    ...Typography.labelMd,
+    color: Colors.onPrimary,
+    letterSpacing: 2,
+  },
+
+  // ── Uploaded face ──
   uploadedCard: {
     backgroundColor: Colors.surfaceElevated,
     paddingTop: 28,

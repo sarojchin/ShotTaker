@@ -24,7 +24,11 @@ function writeMeta(photos: LocalPhoto[]): void {
   metaFile.write(JSON.stringify(photos));
 }
 
-export function savePhoto(uri: string, dateKey: string, label?: string): LocalPhoto {
+export function savePhoto(
+  uri: string,
+  dateKey: string,
+  meta?: { title?: string; location?: string; notes?: string },
+): LocalPhoto {
   ensureShotsDir();
 
   const filename = `${dateKey}-${Date.now()}.jpg`;
@@ -35,7 +39,9 @@ export function savePhoto(uri: string, dateKey: string, label?: string): LocalPh
   const photo: LocalPhoto = {
     dateKey,
     localPath: dest.uri,
-    ...(label ? { label } : {}),
+    ...(meta?.title ? { title: meta.title } : {}),
+    ...(meta?.location ? { location: meta.location } : {}),
+    ...(meta?.notes ? { notes: meta.notes } : {}),
   };
 
   const photos = readMeta();
