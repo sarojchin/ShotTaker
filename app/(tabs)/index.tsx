@@ -256,15 +256,15 @@ export default function TodayScreen() {
                       style={styles.modalImage}
                       resizeMode="cover"
                     />
-                    <View style={styles.pageDots}>
-                      {expandedSlot.photos.map((_, i) => (
-                        <View
-                          key={i}
-                          style={[styles.pageDot, i === itemIdx && styles.pageDotActive]}
-                        />
-                      ))}
-                    </View>
                     <View style={styles.modalMeta}>
+                      <View style={styles.pageDots}>
+                        {expandedSlot.photos.map((_, i) => (
+                          <View
+                            key={i}
+                            style={[styles.pageDot, i === itemIdx && styles.pageDotActive]}
+                          />
+                        ))}
+                      </View>
                       {item.title ? <Text style={styles.modalLabel}>{item.title}</Text> : null}
                       <Text style={styles.modalDate}>{expandedSlot.dateLabel}</Text>
                     </View>
@@ -502,13 +502,13 @@ const styles = StyleSheet.create({
     color: Colors.outlineVariant,
   },
 
-  // Page dots
+  // Page dots (inline inside meta overlay)
   pageDots: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
-    paddingVertical: 10,
+    paddingBottom: 8,
   },
   pageDot: {
     width: 6,
@@ -527,7 +527,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
   },
   modalContent: {
     width: '100%',
@@ -540,8 +539,14 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
   },
   modalMeta: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingTop: 10,
+    paddingBottom: 14,
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalLabel: {
     ...Typography.titleSm,
