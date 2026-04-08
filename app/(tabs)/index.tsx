@@ -193,6 +193,13 @@ export default function TodayScreen() {
               [...prev, photo].sort((a, b) => b.dateKey.localeCompare(a.dateKey))
             );
           }}
+          onReviewShot={(uri) => {
+            const slot = daySlots.find(s => s.photos.some(p => p.localPath === uri));
+            if (!slot) return;
+            const pageIndex = slot.photos.findIndex(p => p.localPath === uri);
+            setModalPage(pageIndex >= 0 ? pageIndex : 0);
+            setExpandedSlot(slot);
+          }}
         />
 
         {/* Inspiration Card */}
