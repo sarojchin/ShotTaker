@@ -113,13 +113,13 @@ export default function TodayScreen() {
         const page = modalPageRef.current;
         const total = expandedPhotosRef.current.length;
         if (gs.dx < -SWIPE_THRESHOLD && page < total - 1) {
-          Animated.timing(cardTranslateX, { toValue: -SCREEN_WIDTH, duration: 200, useNativeDriver: true })
+          Animated.timing(cardTranslateX, { toValue: -SCREEN_WIDTH, duration: 200, useNativeDriver: false })
             .start(() => { cardTranslateX.setValue(0); modalPageRef.current = page + 1; setModalPage(page + 1); });
         } else if (gs.dx > SWIPE_THRESHOLD && page > 0) {
-          Animated.timing(cardTranslateX, { toValue: SCREEN_WIDTH, duration: 200, useNativeDriver: true })
+          Animated.timing(cardTranslateX, { toValue: SCREEN_WIDTH, duration: 200, useNativeDriver: false })
             .start(() => { cardTranslateX.setValue(0); modalPageRef.current = page - 1; setModalPage(page - 1); });
         } else {
-          Animated.spring(cardTranslateX, { toValue: 0, useNativeDriver: true, friction: 9, tension: 130 }).start();
+          Animated.spring(cardTranslateX, { toValue: 0, useNativeDriver: false, friction: 9, tension: 130 }).start();
         }
       },
     })
