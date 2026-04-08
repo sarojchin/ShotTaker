@@ -265,11 +265,11 @@ export default function TodayScreen() {
                       ))}
                     </View>
                     <View style={styles.modalMeta}>
-                      <Text style={styles.modalLabel}>{item.title ?? 'Daily Shot'}</Text>
+                      {item.title ? <Text style={styles.modalLabel}>{item.title}</Text> : null}
                       <Text style={styles.modalDate}>{expandedSlot.dateLabel}</Text>
                     </View>
                     <TouchableOpacity style={styles.modalClose} onPress={dismiss}>
-                      <Ionicons name="close" size={20} color={Colors.onBackground} />
+                      <Ionicons name="close" size={20} color="#fff" />
                     </TouchableOpacity>
                   </View>
                 )}
@@ -282,11 +282,11 @@ export default function TodayScreen() {
                   resizeMode="cover"
                 />
                 <View style={styles.modalMeta}>
-                  <Text style={styles.modalLabel}>{expandedSlot.photos[0].title ?? 'Daily Shot'}</Text>
+                  {expandedSlot.photos[0].title ? <Text style={styles.modalLabel}>{expandedSlot.photos[0].title}</Text> : null}
                   <Text style={styles.modalDate}>{expandedSlot.dateLabel}</Text>
                 </View>
                 <TouchableOpacity style={styles.modalClose} onPress={dismiss}>
-                  <Ionicons name="close" size={20} color={Colors.onBackground} />
+                  <Ionicons name="close" size={20} color="#fff" />
                 </TouchableOpacity>
               </View>
             ) : null}
@@ -514,24 +514,24 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: Colors.outlineVariant,
+    backgroundColor: 'rgba(255,255,255,0.25)',
   },
   pageDotActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: 'rgba(255,255,255,0.9)',
     width: 16,
   },
 
   // Expanded Picture Modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(28,27,27,0.85)',
+    backgroundColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
   },
   modalContent: {
     width: '100%',
-    backgroundColor: Colors.surfaceElevated,
+    backgroundColor: '#000',
     borderRadius: 6,
     overflow: 'hidden',
   },
@@ -541,16 +541,16 @@ const styles = StyleSheet.create({
   },
   modalMeta: {
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 10,
   },
   modalLabel: {
     ...Typography.titleSm,
-    color: Colors.onBackground,
+    color: '#fff',
   },
   modalDate: {
     ...Typography.labelSm,
-    color: Colors.textMuted,
-    marginTop: 4,
+    color: 'rgba(255,255,255,0.5)',
+    marginTop: 2,
   },
   modalClose: {
     position: 'absolute',
@@ -559,7 +559,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(252,249,248,0.85)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
     alignItems: 'center',
     justifyContent: 'center',
   },
