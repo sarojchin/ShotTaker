@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,8 +9,7 @@ import {
   Modal,
   Image,
   Dimensions,
-  Animated,
-  PanResponder,
+  FlatList,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -83,47 +82,9 @@ function buildDaySlots(photos: LocalPhoto[]): DaySlot[] {
 export default function TodayScreen() {
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [expandedSlot, setExpandedSlot] = useState<DaySlot | null>(null);
-  const [modalPage, setModalPage] = useState(0);
+  const [initialPage, setInitialPage] = useState(0);
 
-  const cardTranslateX = useRef(new Animated.Value(0)).current;
-  const modalPageRef = useRef(0);
-  const expandedPhotosRef = useRef<LocalPhoto[]>([]);
-
-  useEffect(() => { modalPageRef.current = modalPage; }, [modalPage]);
-  useEffect(() => { expandedPhotosRef.current = expandedSlot?.photos ?? []; }, [expandedSlot]);
-
-  const SWIPE_THRESHOLD = 60;
-  const SCREEN_WIDTH = Dimensions.get('window').width;
-
-  const cardPanResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (_, gs) =>
-        Math.abs(gs.dx) > 8 && Math.abs(gs.dx) > Math.abs(gs.dy),
-      onPanResponderGrant: () => { cardTranslateX.stopAnimation(); },
-      onPanResponderMove: (_, gs) => {
-        const page = modalPageRef.current;
-        const total = expandedPhotosRef.current.length;
-        if ((gs.dx > 0 && page === 0) || (gs.dx < 0 && page === total - 1)) {
-          cardTranslateX.setValue(gs.dx * 0.2);
-        } else {
-          cardTranslateX.setValue(gs.dx);
-        }
-      },
-      onPanResponderRelease: (_, gs) => {
-        const page = modalPageRef.current;
-        const total = expandedPhotosRef.current.length;
-        if (gs.dx < -SWIPE_THRESHOLD && page < total - 1) {
-          Animated.timing(cardTranslateX, { toValue: -SCREEN_WIDTH, duration: 200, useNativeDriver: false })
-            .start(() => { cardTranslateX.setValue(0); modalPageRef.current = page + 1; setModalPage(page + 1); });
-        } else if (gs.dx > SWIPE_THRESHOLD && page > 0) {
-          Animated.timing(cardTranslateX, { toValue: SCREEN_WIDTH, duration: 200, useNativeDriver: false })
-            .start(() => { cardTranslateX.setValue(0); modalPageRef.current = page - 1; setModalPage(page - 1); });
-        } else {
-          Animated.spring(cardTranslateX, { toValue: 0, useNativeDriver: false, friction: 9, tension: 130 }).start();
-        }
-      },
-    })
-  ).current;
+  const dismiss = useCallback(() => setExpandedSlot(null), []);
 
   const loadPhotos = useCallback(() => {
     setPhotos(getPhotos());
@@ -197,7 +158,7 @@ export default function TodayScreen() {
             const todayKey = localDateKey(new Date());
             const slot = daySlots.find(s => s.dateKey === todayKey);
             if (!slot || slot.photos.length === 0) return;
-            setModalPage(slot.photos.length - 1);
+            setInitialPage(slot.photos.length - 1);
             setExpandedSlot(slot);
           }}
         />
@@ -224,7 +185,7 @@ export default function TodayScreen() {
               style={styles.yourPictureItem}
               onPress={() => {
                 if (slot.photos.length > 0) {
-                  setModalPage(0);
+                  setInitialPage(0);
                   setExpandedSlot(slot);
                 }
               }}
@@ -265,47 +226,70 @@ export default function TodayScreen() {
           visible={expandedSlot !== null}
           transparent
           animationType="fade"
-          onRequestClose={() => { cardTranslateX.setValue(0); setExpandedSlot(null); }}
+          onRequestClose={dismiss}
         >
           <View style={styles.modalOverlay}>
-            {/* Background: absoluteFill, rendered behind content. Tap to dismiss. */}
-            <TouchableWithoutFeedback onPress={() => { cardTranslateX.setValue(0); setExpandedSlot(null); }}>
+            {/* Background dismiss layer */}
+            <TouchableWithoutFeedback onPress={dismiss}>
               <View style={StyleSheet.absoluteFillObject} />
             </TouchableWithoutFeedback>
 
-            <Animated.View
-              style={[styles.modalContent, { transform: [{ translateX: cardTranslateX }] }]}
-              {...(expandedSlot && expandedSlot.photos.length > 1 ? cardPanResponder.panHandlers : {})}
-            >
-              {expandedSlot && (
+            {expandedSlot && expandedSlot.photos.length > 1 ? (
+              <FlatList
+                key={expandedSlot.dateKey}
+                data={expandedSlot.photos}
+                horizontal
+                pagingEnabled
+                initialScrollIndex={initialPage}
+                getItemLayout={(_, index) => ({
+                  length: MODAL_CONTENT_WIDTH,
+                  offset: MODAL_CONTENT_WIDTH * index,
+                  index,
+                })}
+                keyExtractor={(item) => item.localPath}
+                showsHorizontalScrollIndicator={false}
+                style={{ width: MODAL_CONTENT_WIDTH }}
+                renderItem={({ item, index: itemIdx }) => (
+                  <View style={[styles.modalContent, { width: MODAL_CONTENT_WIDTH }]}>
+                    <Image
+                      source={{ uri: item.localPath }}
+                      style={styles.modalImage}
+                      resizeMode="cover"
+                    />
+                    <View style={styles.pageDots}>
+                      {expandedSlot.photos.map((_, i) => (
+                        <View
+                          key={i}
+                          style={[styles.pageDot, i === itemIdx && styles.pageDotActive]}
+                        />
+                      ))}
+                    </View>
+                    <View style={styles.modalMeta}>
+                      <Text style={styles.modalLabel}>{item.title ?? 'Daily Shot'}</Text>
+                      <Text style={styles.modalDate}>{expandedSlot.dateLabel}</Text>
+                    </View>
+                    <TouchableOpacity style={styles.modalClose} onPress={dismiss}>
+                      <Ionicons name="close" size={20} color={Colors.onBackground} />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              />
+            ) : expandedSlot ? (
+              <View style={styles.modalContent}>
                 <Image
-                  source={{ uri: expandedSlot.photos[modalPage].localPath }}
+                  source={{ uri: expandedSlot.photos[0].localPath }}
                   style={styles.modalImage}
                   resizeMode="cover"
                 />
-              )}
-
-              {expandedSlot && expandedSlot.photos.length > 1 && (
-                <View style={styles.pageDots}>
-                  {expandedSlot.photos.map((_, i) => (
-                    <View
-                      key={i}
-                      style={[styles.pageDot, i === modalPage && styles.pageDotActive]}
-                    />
-                  ))}
+                <View style={styles.modalMeta}>
+                  <Text style={styles.modalLabel}>{expandedSlot.photos[0].title ?? 'Daily Shot'}</Text>
+                  <Text style={styles.modalDate}>{expandedSlot.dateLabel}</Text>
                 </View>
-              )}
-
-              <View style={styles.modalMeta}>
-                <Text style={styles.modalLabel}>
-                  {expandedSlot?.photos[modalPage]?.title ?? 'Daily Shot'}
-                </Text>
-                <Text style={styles.modalDate}>{expandedSlot?.dateLabel}</Text>
+                <TouchableOpacity style={styles.modalClose} onPress={dismiss}>
+                  <Ionicons name="close" size={20} color={Colors.onBackground} />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity style={styles.modalClose} onPress={() => { cardTranslateX.setValue(0); setExpandedSlot(null); }}>
-                <Ionicons name="close" size={20} color={Colors.onBackground} />
-              </TouchableOpacity>
-            </Animated.View>
+            ) : null}
           </View>
         </Modal>
 
