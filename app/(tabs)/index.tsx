@@ -90,14 +90,14 @@ function buildDaySlots(photos: LocalPhoto[]): DaySlot[] {
 
 export default function TodayScreen() {
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
-<<<<<<< HEAD
+
   const [detailPhotos, setDetailPhotos] = useState<LocalPhoto[] | null>(null);
   const [detailPhotoIdx, setDetailPhotoIdx] = useState(0);
   const lastUploadedPhoto = useRef<LocalPhoto | null>(null);
 
   const detailPhoto = detailPhotos ? detailPhotos[detailPhotoIdx] : null;
   const closeDetail = () => { setDetailPhotos(null); setDetailPhotoIdx(0); };
-=======
+
   const [expandedSlot, setExpandedSlot] = useState<DaySlot | null>(null);
   const [initialPage, setInitialPage] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
@@ -112,7 +112,7 @@ export default function TodayScreen() {
   }, [expandedSlot]);
 
   const dismiss = useCallback(() => setExpandedSlot(null), []);
->>>>>>> claude/swipe-photo-detail-animation-lE7Pw
+
 
   const loadPhotos = useCallback(() => {
     setPhotos(getPhotos());
@@ -221,13 +221,13 @@ export default function TodayScreen() {
               style={styles.yourPictureItem}
               onPress={() => {
                 if (slot.photos.length > 0) {
-<<<<<<< HEAD
+
                   setDetailPhotos(slot.photos);
                   setDetailPhotoIdx(0);
-=======
+
                   setInitialPage(0);
                   setExpandedSlot(slot);
->>>>>>> claude/swipe-photo-detail-animation-lE7Pw
+
                 }
               }}
               activeOpacity={slot.photos.length > 0 ? 0.8 : 1}
@@ -266,7 +266,7 @@ export default function TodayScreen() {
         <Modal
           visible={detailPhotos !== null}
           transparent
-<<<<<<< HEAD
+
           animationType="slide"
           onRequestClose={closeDetail}
         >
@@ -362,7 +362,7 @@ export default function TodayScreen() {
                 ) : null}
               </ScrollView>
             </View>
-=======
+
           animationType="fade"
           onRequestClose={dismiss}
         >
@@ -423,7 +423,7 @@ export default function TodayScreen() {
                 </TouchableOpacity>
               </View>
             ) : null}
->>>>>>> claude/swipe-photo-detail-animation-lE7Pw
+
           </View>
         </Modal>
 
@@ -658,7 +658,7 @@ const styles = StyleSheet.create({
   // Photo Detail Modal
   detailOverlay: {
     flex: 1,
-<<<<<<< HEAD
+
     backgroundColor: 'rgba(28,27,27,0.85)',
     justifyContent: 'center',
     paddingHorizontal: 20,
@@ -666,7 +666,7 @@ const styles = StyleSheet.create({
   detailCard: {
     backgroundColor: Colors.surfaceElevated,
     borderRadius: 12,
-=======
+
     backgroundColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
@@ -675,7 +675,7 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#000',
     borderRadius: 6,
->>>>>>> claude/swipe-photo-detail-animation-lE7Pw
+
     overflow: 'hidden',
   },
   detailHeader: {
@@ -711,7 +711,7 @@ const styles = StyleSheet.create({
     width: '100%',
     aspectRatio: 1,
   },
-<<<<<<< HEAD
+
   detailScroll: {
     maxHeight: Math.round(SCREEN_HEIGHT * 0.3),
   },
@@ -748,7 +748,7 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
     backgroundColor: Colors.outlineVariant,
     marginVertical: 20,
-=======
+
   modalMeta: {
     position: 'absolute',
     bottom: 0,
@@ -762,14 +762,14 @@ const styles = StyleSheet.create({
   modalLabel: {
     ...Typography.titleSm,
     color: '#fff',
->>>>>>> claude/swipe-photo-detail-animation-lE7Pw
+
   },
   detailSection: {
     marginBottom: 16,
   },
   detailMetaLabel: {
     ...Typography.labelSm,
-<<<<<<< HEAD
+
     color: Colors.textMuted,
     letterSpacing: 1,
     marginBottom: 4,
@@ -778,7 +778,7 @@ const styles = StyleSheet.create({
   detailMetaValue: {
     ...Typography.bodyMd,
     color: Colors.onBackground,
-=======
+
     color: 'rgba(255,255,255,0.5)',
     marginTop: 2,
   },
@@ -792,7 +792,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.15)',
     alignItems: 'center',
     justifyContent: 'center',
->>>>>>> claude/swipe-photo-detail-animation-lE7Pw
+
   },
 
   // Gallery Strip
