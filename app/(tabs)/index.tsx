@@ -27,12 +27,12 @@ import { currentUserStreak, quotes } from '../../data/mockData';
 import inspirations from '../../data/inspirations';
 import dailyTips from '../../data/dailyTips';
 
-<<<<<<< HEAD
+
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
-=======
+
 const MODAL_CONTENT_WIDTH = Dimensions.get('window').width;
->>>>>>> claude/swipe-photo-detail-animation-lE7Pw
+
 
 // Placeholder gallery images (mock colors representing photos)
 const GALLERY_STRIP = [
