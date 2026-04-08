@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,6 @@ import {
   Modal,
   Image,
   Dimensions,
-  FlatList,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -82,6 +81,16 @@ export default function TodayScreen() {
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [expandedSlot, setExpandedSlot] = useState<DaySlot | null>(null);
   const [initialPage, setInitialPage] = useState(0);
+  const scrollRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (expandedSlot && initialPage > 0) {
+      const t = setTimeout(() => {
+        scrollRef.current?.scrollTo({ x: MODAL_CONTENT_WIDTH * initialPage, animated: false });
+      }, 0);
+      return () => clearTimeout(t);
+    }
+  }, [expandedSlot]);
 
   const dismiss = useCallback(() => setExpandedSlot(null), []);
 
@@ -234,45 +243,40 @@ export default function TodayScreen() {
             </TouchableWithoutFeedback>
 
             {expandedSlot && expandedSlot.photos.length > 1 ? (
-              <FlatList
-                key={expandedSlot.dateKey}
-                data={expandedSlot.photos}
-                horizontal
-                pagingEnabled
-                initialScrollIndex={initialPage}
-                getItemLayout={(_, index) => ({
-                  length: MODAL_CONTENT_WIDTH,
-                  offset: MODAL_CONTENT_WIDTH * index,
-                  index,
-                })}
-                keyExtractor={(item) => item.localPath}
-                showsHorizontalScrollIndicator={false}
-                style={{ width: MODAL_CONTENT_WIDTH, height: MODAL_CONTENT_WIDTH }}
-                renderItem={({ item, index: itemIdx }) => (
-                  <View style={[styles.modalContent, { width: MODAL_CONTENT_WIDTH }]}>
-                    <Image
-                      source={{ uri: item.localPath }}
-                      style={styles.modalImage}
-                      resizeMode="cover"
-                    />
-                    <View style={styles.modalMeta}>
-                      <View style={styles.pageDots}>
-                        {expandedSlot.photos.map((_, i) => (
-                          <View
-                            key={i}
-                            style={[styles.pageDot, i === itemIdx && styles.pageDotActive]}
-                          />
-                        ))}
+              <View style={{ width: MODAL_CONTENT_WIDTH, height: MODAL_CONTENT_WIDTH }}>
+                <ScrollView
+                  ref={scrollRef}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  style={{ flex: 1 }}
+                >
+                  {expandedSlot.photos.map((photo, itemIdx) => (
+                    <View key={photo.localPath} style={[styles.modalContent, { width: MODAL_CONTENT_WIDTH, height: MODAL_CONTENT_WIDTH }]}>
+                      <Image
+                        source={{ uri: photo.localPath }}
+                        style={styles.modalImage}
+                        resizeMode="cover"
+                      />
+                      <View style={styles.modalMeta}>
+                        <View style={styles.pageDots}>
+                          {expandedSlot.photos.map((_, i) => (
+                            <View
+                              key={i}
+                              style={[styles.pageDot, i === itemIdx && styles.pageDotActive]}
+                            />
+                          ))}
+                        </View>
+                        {photo.title ? <Text style={styles.modalLabel}>{photo.title}</Text> : null}
+                        <Text style={styles.modalDate}>{expandedSlot.dateLabel}</Text>
                       </View>
-                      {item.title ? <Text style={styles.modalLabel}>{item.title}</Text> : null}
-                      <Text style={styles.modalDate}>{expandedSlot.dateLabel}</Text>
+                      <TouchableOpacity style={styles.modalClose} onPress={dismiss}>
+                        <Ionicons name="close" size={20} color="#fff" />
+                      </TouchableOpacity>
                     </View>
-                    <TouchableOpacity style={styles.modalClose} onPress={dismiss}>
-                      <Ionicons name="close" size={20} color="#fff" />
-                    </TouchableOpacity>
-                  </View>
-                )}
-              />
+                  ))}
+                </ScrollView>
+              </View>
             ) : expandedSlot ? (
               <View style={styles.modalContent}>
                 <Image
