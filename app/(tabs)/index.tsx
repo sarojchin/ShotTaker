@@ -8,7 +8,6 @@ import {
   Modal,
   Image,
   Dimensions,
-  FlatList,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,8 +27,12 @@ import { currentUserStreak, quotes } from '../../data/mockData';
 import inspirations from '../../data/inspirations';
 import dailyTips from '../../data/dailyTips';
 
+<<<<<<< HEAD
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
+=======
+const MODAL_CONTENT_WIDTH = Dimensions.get('window').width;
+>>>>>>> claude/swipe-photo-detail-animation-lE7Pw
 
 // Placeholder gallery images (mock colors representing photos)
 const GALLERY_STRIP = [
@@ -87,12 +90,29 @@ function buildDaySlots(photos: LocalPhoto[]): DaySlot[] {
 
 export default function TodayScreen() {
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
+<<<<<<< HEAD
   const [detailPhotos, setDetailPhotos] = useState<LocalPhoto[] | null>(null);
   const [detailPhotoIdx, setDetailPhotoIdx] = useState(0);
   const lastUploadedPhoto = useRef<LocalPhoto | null>(null);
 
   const detailPhoto = detailPhotos ? detailPhotos[detailPhotoIdx] : null;
   const closeDetail = () => { setDetailPhotos(null); setDetailPhotoIdx(0); };
+=======
+  const [expandedSlot, setExpandedSlot] = useState<DaySlot | null>(null);
+  const [initialPage, setInitialPage] = useState(0);
+  const scrollRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (expandedSlot && initialPage > 0) {
+      const t = setTimeout(() => {
+        scrollRef.current?.scrollTo({ x: MODAL_CONTENT_WIDTH * initialPage, animated: false });
+      }, 0);
+      return () => clearTimeout(t);
+    }
+  }, [expandedSlot]);
+
+  const dismiss = useCallback(() => setExpandedSlot(null), []);
+>>>>>>> claude/swipe-photo-detail-animation-lE7Pw
 
   const loadPhotos = useCallback(() => {
     setPhotos(getPhotos());
@@ -164,10 +184,18 @@ export default function TodayScreen() {
             );
           }}
           onReviewShot={() => {
+<<<<<<< HEAD
             if (lastUploadedPhoto.current) {
               setDetailPhotos([lastUploadedPhoto.current]);
               setDetailPhotoIdx(0);
             }
+=======
+            const todayKey = localDateKey(new Date());
+            const slot = daySlots.find(s => s.dateKey === todayKey);
+            if (!slot || slot.photos.length === 0) return;
+            setInitialPage(slot.photos.length - 1);
+            setExpandedSlot(slot);
+>>>>>>> claude/swipe-photo-detail-animation-lE7Pw
           }}
         />
 
@@ -193,8 +221,13 @@ export default function TodayScreen() {
               style={styles.yourPictureItem}
               onPress={() => {
                 if (slot.photos.length > 0) {
+<<<<<<< HEAD
                   setDetailPhotos(slot.photos);
                   setDetailPhotoIdx(0);
+=======
+                  setInitialPage(0);
+                  setExpandedSlot(slot);
+>>>>>>> claude/swipe-photo-detail-animation-lE7Pw
                 }
               }}
               activeOpacity={slot.photos.length > 0 ? 0.8 : 1}
@@ -233,6 +266,7 @@ export default function TodayScreen() {
         <Modal
           visible={detailPhotos !== null}
           transparent
+<<<<<<< HEAD
           animationType="slide"
           onRequestClose={closeDetail}
         >
@@ -328,6 +362,68 @@ export default function TodayScreen() {
                 ) : null}
               </ScrollView>
             </View>
+=======
+          animationType="fade"
+          onRequestClose={dismiss}
+        >
+          <View style={styles.modalOverlay}>
+            {/* Background dismiss layer */}
+            <TouchableWithoutFeedback onPress={dismiss}>
+              <View style={StyleSheet.absoluteFillObject} />
+            </TouchableWithoutFeedback>
+
+            {expandedSlot && expandedSlot.photos.length > 1 ? (
+              <View style={{ width: MODAL_CONTENT_WIDTH, height: MODAL_CONTENT_WIDTH }}>
+                <ScrollView
+                  ref={scrollRef}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  style={{ flex: 1 }}
+                >
+                  {expandedSlot.photos.map((photo, itemIdx) => (
+                    <View key={photo.localPath} style={[styles.modalContent, { width: MODAL_CONTENT_WIDTH, height: MODAL_CONTENT_WIDTH }]}>
+                      <Image
+                        source={{ uri: photo.localPath }}
+                        style={styles.modalImage}
+                        resizeMode="cover"
+                      />
+                      <View style={styles.modalMeta}>
+                        <View style={styles.pageDots}>
+                          {expandedSlot.photos.map((_, i) => (
+                            <View
+                              key={i}
+                              style={[styles.pageDot, i === itemIdx && styles.pageDotActive]}
+                            />
+                          ))}
+                        </View>
+                        {photo.title ? <Text style={styles.modalLabel}>{photo.title}</Text> : null}
+                        <Text style={styles.modalDate}>{expandedSlot.dateLabel}</Text>
+                      </View>
+                      <TouchableOpacity style={styles.modalClose} onPress={dismiss}>
+                        <Ionicons name="close" size={20} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
+            ) : expandedSlot ? (
+              <View style={styles.modalContent}>
+                <Image
+                  source={{ uri: expandedSlot.photos[0].localPath }}
+                  style={styles.modalImage}
+                  resizeMode="cover"
+                />
+                <View style={styles.modalMeta}>
+                  {expandedSlot.photos[0].title ? <Text style={styles.modalLabel}>{expandedSlot.photos[0].title}</Text> : null}
+                  <Text style={styles.modalDate}>{expandedSlot.dateLabel}</Text>
+                </View>
+                <TouchableOpacity style={styles.modalClose} onPress={dismiss}>
+                  <Ionicons name="close" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            ) : null}
+>>>>>>> claude/swipe-photo-detail-animation-lE7Pw
           </View>
         </Modal>
 
@@ -540,28 +636,29 @@ const styles = StyleSheet.create({
     color: Colors.outlineVariant,
   },
 
-  // Page dots
+  // Page dots (inline inside meta overlay)
   pageDots: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
-    paddingVertical: 10,
+    paddingBottom: 8,
   },
   pageDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: Colors.outlineVariant,
+    backgroundColor: 'rgba(255,255,255,0.25)',
   },
   pageDotActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: 'rgba(255,255,255,0.9)',
     width: 16,
   },
 
   // Photo Detail Modal
   detailOverlay: {
     flex: 1,
+<<<<<<< HEAD
     backgroundColor: 'rgba(28,27,27,0.85)',
     justifyContent: 'center',
     paddingHorizontal: 20,
@@ -569,6 +666,16 @@ const styles = StyleSheet.create({
   detailCard: {
     backgroundColor: Colors.surfaceElevated,
     borderRadius: 12,
+=======
+    backgroundColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalContent: {
+    width: '100%',
+    backgroundColor: '#000',
+    borderRadius: 6,
+>>>>>>> claude/swipe-photo-detail-animation-lE7Pw
     overflow: 'hidden',
   },
   detailHeader: {
@@ -604,6 +711,7 @@ const styles = StyleSheet.create({
     width: '100%',
     aspectRatio: 1,
   },
+<<<<<<< HEAD
   detailScroll: {
     maxHeight: Math.round(SCREEN_HEIGHT * 0.3),
   },
@@ -640,12 +748,28 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
     backgroundColor: Colors.outlineVariant,
     marginVertical: 20,
+=======
+  modalMeta: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 14,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalLabel: {
+    ...Typography.titleSm,
+    color: '#fff',
+>>>>>>> claude/swipe-photo-detail-animation-lE7Pw
   },
   detailSection: {
     marginBottom: 16,
   },
   detailMetaLabel: {
     ...Typography.labelSm,
+<<<<<<< HEAD
     color: Colors.textMuted,
     letterSpacing: 1,
     marginBottom: 4,
@@ -654,6 +778,21 @@ const styles = StyleSheet.create({
   detailMetaValue: {
     ...Typography.bodyMd,
     color: Colors.onBackground,
+=======
+    color: 'rgba(255,255,255,0.5)',
+    marginTop: 2,
+  },
+  modalClose: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+>>>>>>> claude/swipe-photo-detail-animation-lE7Pw
   },
 
   // Gallery Strip
