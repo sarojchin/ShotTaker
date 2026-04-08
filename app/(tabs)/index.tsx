@@ -29,8 +29,7 @@ import { currentUserStreak, quotes } from '../../data/mockData';
 import inspirations from '../../data/inspirations';
 import dailyTips from '../../data/dailyTips';
 
-// modalOverlay has padding: 24 on each side → content fills the remaining width
-const MODAL_CONTENT_WIDTH = Dimensions.get('window').width - 48;
+const MODAL_CONTENT_WIDTH = Dimensions.get('window').width;
 
 // Placeholder gallery images (mock colors representing photos)
 const GALLERY_STRIP = [
@@ -248,7 +247,7 @@ export default function TodayScreen() {
                 })}
                 keyExtractor={(item) => item.localPath}
                 showsHorizontalScrollIndicator={false}
-                style={{ width: MODAL_CONTENT_WIDTH }}
+                style={{ width: MODAL_CONTENT_WIDTH, height: MODAL_CONTENT_WIDTH }}
                 renderItem={({ item, index: itemIdx }) => (
                   <View style={[styles.modalContent, { width: MODAL_CONTENT_WIDTH }]}>
                     <Image
