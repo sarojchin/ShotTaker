@@ -184,18 +184,18 @@ export default function TodayScreen() {
             );
           }}
           onReviewShot={() => {
-<<<<<<< HEAD
+
             if (lastUploadedPhoto.current) {
               setDetailPhotos([lastUploadedPhoto.current]);
               setDetailPhotoIdx(0);
             }
-=======
+
             const todayKey = localDateKey(new Date());
             const slot = daySlots.find(s => s.dateKey === todayKey);
             if (!slot || slot.photos.length === 0) return;
             setInitialPage(slot.photos.length - 1);
             setExpandedSlot(slot);
->>>>>>> claude/swipe-photo-detail-animation-lE7Pw
+
           }}
         />
 
