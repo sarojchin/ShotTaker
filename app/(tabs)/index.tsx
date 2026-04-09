@@ -362,7 +362,12 @@ export default function TodayScreen() {
                 ) : null}
               </ScrollView>
             </View>
+          </View>
+        </Modal>
 
+        <Modal
+          visible={expandedSlot !== null}
+          transparent
           animationType="fade"
           onRequestClose={dismiss}
         >
