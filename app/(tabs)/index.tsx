@@ -753,7 +753,7 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
     backgroundColor: Colors.outlineVariant,
     marginVertical: 20,
-
+  },
   modalMeta: {
     position: 'absolute',
     bottom: 0,
@@ -767,7 +767,11 @@ const styles = StyleSheet.create({
   modalLabel: {
     ...Typography.titleSm,
     color: '#fff',
-
+  },
+  modalDate: {
+    ...Typography.labelSm,
+    color: 'rgba(255,255,255,0.6)',
+    marginTop: 2,
   },
   detailSection: {
     marginBottom: 16,
@@ -783,8 +787,6 @@ const styles = StyleSheet.create({
   detailMetaValue: {
     ...Typography.bodyMd,
     color: Colors.onBackground,
-
-    color: 'rgba(255,255,255,0.5)',
     marginTop: 2,
   },
   modalClose: {
